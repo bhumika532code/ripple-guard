@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vulnerability Scoreboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Vulnerability Scoreboard</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="graph.html">Dependency Graph</a>
+      <a href="propagation.html">Propagation Simulator</a>
+      <a href="scoreboard.html">Vulnerability Scoreboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="scoreboard-panel">
+      <table>
+        <thead>
+          <tr>
+            <th></th><th>Package</th><th>Vuln Score</th><th>True Risk</th>
+            <th>Direct Deps</th><th>Apps Affected</th><th>Action</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="scoreboard-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="shared.js"></script>
+  <script src="scoreboard.js"></script>
+</body>
+</html>

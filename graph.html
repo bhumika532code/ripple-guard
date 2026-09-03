@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dependency Graph</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Dependency Graph</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="graph.html">Dependency Graph</a>
+      <a href="propagation.html">Propagation Simulator</a>
+      <a href="scoreboard.html">Vulnerability Scoreboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="graph-panel">
+      <svg id="graph" viewBox="0 0 900 550"></svg>
+    </section>
+    <section id="info-panel">
+      <p id="placeholder-text">Click a package to see its summary.</p>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="shared.js"></script>
+  <script src="graph.js"></script>
+</body>
+</html>

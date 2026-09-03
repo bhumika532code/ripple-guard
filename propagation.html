@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Propagation Simulator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Propagation Simulator</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="graph.html">Dependency Graph</a>
+      <a href="propagation.html">Propagation Simulator</a>
+      <a href="scoreboard.html">Vulnerability Scoreboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="graph-panel">
+      <select id="node-select"><option value="">Choose a package…</option></select>
+      <svg id="graph" viewBox="0 0 900 550"></svg>
+    </section>
+    <section id="info-panel">
+      <p id="placeholder-text">Pick a package above to simulate a compromise.</p>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="shared.js"></script>
+  <script src="propagation.js"></script>
+</body>
+</html>

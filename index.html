@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dependency Risk Console</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="splash">
+    <svg viewBox="0 0 400 300" id="ripple-svg">
+      <circle id="droplet" cx="200" cy="30" r="6" />
+      <circle class="ripple-ring ring-1" cx="200" cy="180" r="0" />
+      <circle class="ripple-ring ring-2" cx="200" cy="180" r="0" />
+      <circle class="ripple-ring ring-3" cx="200" cy="180" r="0" />
+    </svg>
+    <p id="splash-text">Dependency Risk Console</p>
+  </div>
+
+  <div id="site" class="hidden">
+    <header>
+      <h1>Dependency Risk Console</h1>
+      <p>Map how a single compromised package could ripple through your whole stack.</p>
+    </header>
+
+    <main id="home-main">
+      <a class="nav-card" href="graph.html">
+        <h2>Dependency Graph</h2>
+        <p>See every package and app, and how they connect.</p>
+      </a>
+      <a class="nav-card" href="propagation.html">
+        <h2>Propagation Simulator</h2>
+        <p>Pick a package and watch a compromise spread hop by hop.</p>
+      </a>
+      <a class="nav-card" href="scoreboard.html">
+        <h2>Vulnerability Scoreboard</h2>
+        <p>Every package ranked by true risk, not just its reported score.</p>
+      </a>
+    </main>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="splash.js"></script>
+</body>
+</html>

@@ -89,13 +89,15 @@ NODES.filter(n => n.type === "package").forEach(n => {
 });
 
 function riskColor(score) {
-  if (score >= 70) return "#c4432b";
-  if (score >= 45) return "#c9a227";
-  return "#4c8c6b";
+  if (score >= 70) return "#c4432b"; // Red — Critical
+  if (score >= 52) return "#e67e22"; // Orange — High
+  if (score >= 35) return "#c9a227"; // Yellow — Medium
+  return "#4c8c6b";                  // Green — Low
 }
 
 function riskLabel(score) {
-  if (score >= 70) return "Contain now";
-  if (score >= 45) return "Prioritize this sprint";
-  return "Standard patch cycle";
+  if (score >= 70) return "Critical — Contain now";
+  if (score >= 52) return "High — Prioritize this sprint";
+  if (score >= 35) return "Medium — Scheduled review";
+  return "Low — Standard patch cycle";
 }

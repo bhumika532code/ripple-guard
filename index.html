@@ -1,46 +1,337 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dependency Risk Console</title>
+  <title>RIPPLE GUARD — Dependency Risk Analysis</title>
+  <meta name="description"
+    content="Analyze how dependency vulnerabilities propagate through your software stack. Map dependencies, identify high-risk packages, and visualize compromise cascades." />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
-  <div id="splash">
-    <svg viewBox="0 0 400 300" id="ripple-svg">
-      <circle id="droplet" cx="200" cy="30" r="6" />
-      <circle class="ripple-ring ring-1" cx="200" cy="180" r="0" />
-      <circle class="ripple-ring ring-2" cx="200" cy="180" r="0" />
-      <circle class="ripple-ring ring-3" cx="200" cy="180" r="0" />
-    </svg>
-    <p id="splash-text">Dependency Risk Console</p>
+  <!-- =======================================================================
+       0. CINEMATIC SPLASH SCREEN (WATER DROPLET IMPACT & EXPANDING RIPPLES)
+       ======================================================================= -->
+  <!-- =======================================================================
+       0. CINEMATIC SPLASH SCREEN (TOP VIEW: WATER BALL DROP & TRANSPARENT RIPPLES)
+       ======================================================================= -->
+  <div id="splash" role="banner" aria-label="Loading animation">
+    <div class="topview-water-stage">
+
+      <!-- Still water surface ambient shimmer -->
+      <div class="topview-still-surface"></div>
+
+      <!-- Water Ball Droplet (Falling straight down in top view) -->
+      <div class="topview-drop-assembly">
+        <div class="topview-water-shadow"></div>
+        <div class="topview-water-ball">
+          <span class="water-ball-glint"></span>
+          <span class="water-ball-refract"></span>
+        </div>
+      </div>
+
+      <!-- Impact Flash & Fluid Dispersal -->
+      <div class="topview-impact-core"></div>
+
+      <!-- Transparent Concentric Ripples (Top View) -->
+      <div class="topview-ripples-group">
+        <div class="transparent-ripple tr-1"></div>
+        <div class="transparent-ripple tr-2"></div>
+        <div class="transparent-ripple tr-3"></div>
+        <div class="transparent-ripple tr-4"></div>
+        <div class="transparent-ripple tr-5"></div>
+      </div>
+
+      <!-- Center micro-droplets radiating outward on impact -->
+      <div class="topview-droplet-burst">
+        <span class="topview-droplet-particle tp-1"></span>
+        <span class="topview-droplet-particle tp-2"></span>
+        <span class="topview-droplet-particle tp-3"></span>
+        <span class="topview-droplet-particle tp-4"></span>
+        <span class="topview-droplet-particle tp-5"></span>
+        <span class="topview-droplet-particle tp-6"></span>
+        <span class="topview-droplet-particle tp-7"></span>
+        <span class="topview-droplet-particle tp-8"></span>
+      </div>
+
+    </div>
+
+    <div class="splash-caption">
+      <span class="splash-title">RIPPLE GUARD</span>
+      <span class="splash-sub">Dependency Risk Analysis</span>
+      <span class="splash-skip-hint">Click anywhere to skip intro</span>
+    </div>
   </div>
 
+
+  <!-- =======================================================================
+       MAIN APPLICATION (UNIFIED HORIZON OVER REACTIVE WATER)
+       ======================================================================= -->
   <div id="site" class="hidden">
-    <header>
-      <h1>Dependency Risk Console</h1>
-      <p>Map how a single compromised package could ripple through your whole stack.</p>
+
+    <!-- Sticky Glass Navigation Header -->
+    <header class="app-navbar">
+      <a href="#site" class="nav-brand">
+        <div class="brand-icon-drop">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+          </svg>
+        </div>
+        <div class="brand-text-group">
+          <span class="brand-name">RIPPLE GUARD</span>
+          <span class="brand-subtitle">Dependency Risk Analysis</span>
+        </div>
+      </a>
+
+      <nav class="nav-links">
+        <a class="nav-item" href="#section-graph">01 Graph</a>
+        <a class="nav-item" href="#section-scoreboard">02 Scoreboard</a>
+        <a class="nav-item" href="#section-propagation">03 Simulator</a>
+      </nav>
+
+      <div class="nav-status-badge">
+        <span class="status-dot"></span>
+        <span>Ecosystem Active (18 Nodes)</span>
+      </div>
     </header>
 
-    <main id="home-main">
-      <a class="nav-card" href="graph.html">
-        <h2>Dependency Graph</h2>
-        <p>See every package and app, and how they connect.</p>
-      </a>
-      <a class="nav-card" href="propagation.html">
-        <h2>Propagation Simulator</h2>
-        <p>Pick a package and watch a compromise spread hop by hop.</p>
-      </a>
-      <a class="nav-card" href="scoreboard.html">
-        <h2>Vulnerability Scoreboard</h2>
-        <p>Every package ranked by true risk, not just its reported score.</p>
-      </a>
+    <main>
+      <!-- Hero Landing Section -->
+      <section class="hero-section">
+        <div class="hero-pill">
+          <span>Cascading Risk & Blast Radius Engine</span>
+        </div>
+
+        <h1 class="hero-title">
+          <span class="title-water-accent">RIPPLE GUARD</span>
+        </h1>
+
+        <h2 class="hero-subtitle">Dependency Risk Analysis</h2>
+
+        <p class="hero-description">
+          Analyze how dependency vulnerabilities can propagate through your software stack.
+          Upload your project, map its dependencies, identify high-risk packages, and visualize how a compromise could
+          ripple through connected systems.
+        </p>
+
+        <!-- Project Upload Area -->
+        <div class="upload-panel">
+          <div class="upload-dropzone" id="upload-dropzone">
+            <input type="file" id="project-file-input" accept=".json,application/json" style="display:none;" />
+            <div class="upload-icon-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <div class="upload-title" id="upload-dropzone-title">Upload Project Manifest</div>
+            <div class="upload-sub" id="upload-dropzone-sub">
+              Drag & drop your <span>package.json</span> or click to browse files
+            </div>
+            <div class="upload-meta-info">Supports npm package.json, lockfiles, or ecosystem manifests</div>
+          </div>
+
+          <!-- Active Ecosystem Summary Strip -->
+          <div class="ecosystem-active-strip">
+            <div class="strip-item">
+              <span>Packages & Libs:</span>
+              <span class="strip-val cyan">14</span>
+            </div>
+            <div class="strip-item">
+              <span>Root Applications:</span>
+              <span class="strip-val cyan">4</span>
+            </div>
+            <div class="strip-item">
+              <span>Conduit Links:</span>
+              <span class="strip-val cyan">36</span>
+            </div>
+            <div class="strip-item">
+              <span>High / Critical Vectors:</span>
+              <span class="strip-val red">8 Packages</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Call to Action -->
+        <div class="cta-button-container">
+          <button id="btn-show-analysis" class="btn-show-analysis">
+            <span>SHOW ANALYSIS</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Vertically Scrolling Analysis Flow -->
+      <div class="analysis-container">
+
+        <!-- ===================================================================
+             SECTION 01: DEPENDENCY GRAPH
+             =================================================================== -->
+        <section id="section-graph" class="analysis-section">
+          <div class="section-header-row">
+            <div class="section-title-group">
+              <span class="section-num">SECTION 01</span>
+              <h2 class="section-title">Dependency Graph</h2>
+              <p class="section-desc">
+                Visualize how applications, packages, and dependencies connect across your project.
+              </p>
+            </div>
+
+            <!-- Risk Color Legend -->
+            <div class="risk-legend-bar" aria-label="Risk Legend">
+              <span class="legend-title">Risk:</span>
+              <div class="legend-item"><span class="legend-dot crit"></span><span>Critical (≥70)</span></div>
+              <div class="legend-item"><span class="legend-dot high"></span><span>High (52-69)</span></div>
+              <div class="legend-item"><span class="legend-dot med"></span><span>Medium (35-51)</span></div>
+              <div class="legend-item"><span class="legend-dot low"></span><span>Low (&lt;35)</span></div>
+              <div class="legend-item"><span class="legend-dot app"></span><span>Application</span></div>
+            </div>
+          </div>
+
+          <div class="graph-workspace">
+            <div class="graph-view-card glass-panel">
+              <svg id="graph" viewBox="0 0 900 550"></svg>
+            </div>
+
+            <aside id="graph-info-panel" class="details-side-card">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-cyan)" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                Node Analysis
+              </h3>
+              <div class="info-placeholder">
+                Click any package circle in the graph to inspect reported score, true risk calculation, direct
+                dependents, and apps at risk.
+              </div>
+            </aside>
+          </div>
+        </section>
+
+
+        <!-- ===================================================================
+             SECTION 02: VULNERABILITY SCOREBOARD
+             =================================================================== -->
+        <section id="section-scoreboard" class="analysis-section">
+          <div class="section-header-row">
+            <div class="section-title-group">
+              <span class="section-num">SECTION 02</span>
+              <h2 class="section-title">Vulnerability Scoreboard</h2>
+              <p class="section-desc">
+                Identify the packages carrying the greatest dependency risk, ranked by true cascading impact.
+              </p>
+            </div>
+          </div>
+
+          <div class="glass-panel">
+            <div class="scoreboard-scroll-wrapper">
+              <table class="water-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Package Name</th>
+                    <th>Reported Score</th>
+                    <th>True Risk</th>
+                    <th>Direct Dependents</th>
+                    <th>Apps Affected</th>
+                    <th>Remediation Action</th>
+                    <th>Propagation</th>
+                  </tr>
+                </thead>
+                <tbody id="scoreboard-body">
+                  <!-- Generated dynamically via app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ===================================================================
+             SECTION 03: PROPAGATION SIMULATOR
+             =================================================================== -->
+        <section id="section-propagation" class="analysis-section">
+          <div class="section-header-row">
+            <div class="section-title-group">
+              <span class="section-num">SECTION 03</span>
+              <h2 class="section-title">Propagation Simulator</h2>
+              <p class="section-desc">
+                Select a vulnerable dependency and visualize how a compromise shoots energy pulses through connected
+                packages and applications.
+              </p>
+            </div>
+          </div>
+
+          <!-- Interactive Simulator Controls -->
+          <div class="simulator-controls-bar">
+            <div class="control-input-group">
+              <label for="prop-node-select" class="control-label">Origin Package:</label>
+              <select id="prop-node-select">
+                <option value="">Choose a package to compromise…</option>
+              </select>
+            </div>
+
+            <div class="simulator-btn-group">
+              <button id="btn-trigger-pulse" class="btn-trigger-pulse">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Trigger Laser Pulse</span>
+              </button>
+              <button id="btn-reset-sim" class="btn-reset-sim">Reset</button>
+            </div>
+          </div>
+
+          <div class="graph-workspace">
+            <div class="graph-view-card glass-panel">
+              <svg id="propagation-graph" viewBox="0 0 900 550"></svg>
+            </div>
+
+            <aside id="prop-info-panel" class="details-side-card">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-cyan)" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                Cascade Diagnostics
+              </h3>
+              <div class="info-placeholder">
+                Select a package above or click any node on the graph to watch a laser pulse traverse through network
+                conduits hop by hop.
+              </div>
+            </aside>
+          </div>
+        </section>
+
+      </div>
     </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-tagline">
+        RIPPLE GUARD — A vulnerability enters like a drop in still water, and ripples through the entire ecosystem.
+      </div>
+      <div>Designed for Dependency Risk Analysis & Cascading Vulnerability Prevention</div>
+    </footer>
+
   </div>
 
+  <!-- Scripts -->
+  <script src="water.js"></script>
   <script src="data.js"></script>
+  <script src="shared.js"></script>
+  <script src="app.js"></script>
   <script src="splash.js"></script>
+
 </body>
+
 </html>

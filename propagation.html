@@ -2,30 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Propagation Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Propagation Simulator — RIPPLE GUARD</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>Propagation Simulator</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="graph.html">Dependency Graph</a>
-      <a href="propagation.html">Propagation Simulator</a>
-      <a href="scoreboard.html">Vulnerability Scoreboard</a>
+  <header class="app-navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="brand-icon-drop">
+        <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+      </div>
+      <div class="brand-text-group">
+        <span class="brand-name">RIPPLE GUARD</span>
+        <span class="brand-subtitle">Dependency Risk Analysis</span>
+      </div>
+    </a>
+    <nav class="nav-links">
+      <a class="nav-item" href="index.html">← Unified Console</a>
+      <a class="nav-item" href="graph.html">Dependency Graph</a>
+      <a class="nav-item" href="scoreboard.html">Scoreboard</a>
+      <a class="nav-item" href="propagation.html" style="color:var(--water-cyan);border-color:rgba(56,189,248,0.3);">Simulator</a>
     </nav>
   </header>
 
-  <main>
-    <section id="graph-panel">
-      <select id="node-select"><option value="">Choose a package…</option></select>
-      <svg id="graph" viewBox="0 0 900 550"></svg>
-    </section>
-    <section id="info-panel">
-      <p id="placeholder-text">Pick a package above to simulate a compromise.</p>
+  <main class="analysis-container" style="padding-top: 24px;">
+    <section class="analysis-section">
+      <div class="section-header-row">
+        <div class="section-title-group">
+          <span class="section-num">STANDALONE VIEW</span>
+          <h2 class="section-title">Propagation Simulator</h2>
+          <p class="section-desc">Pick a package and observe how a compromise spreads hop by hop through the network.</p>
+        </div>
+      </div>
+
+      <div class="simulator-controls-bar">
+        <div class="control-input-group">
+          <label for="node-select" class="control-label">Target Package:</label>
+          <select id="node-select"><option value="">Choose a package…</option></select>
+        </div>
+      </div>
+
+      <div class="graph-workspace">
+        <div class="graph-view-card glass-panel">
+          <svg id="graph" viewBox="0 0 900 550"></svg>
+        </div>
+        <aside id="info-panel" class="details-side-card">
+          <p id="placeholder-text" class="info-placeholder">Pick a package above to simulate a compromise.</p>
+        </aside>
+      </div>
     </section>
   </main>
 
+  <script src="water.js"></script>
   <script src="data.js"></script>
   <script src="shared.js"></script>
   <script src="propagation.js"></script>

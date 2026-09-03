@@ -1,19 +1,40 @@
-// Plays the intro animation, then reveals the real site underneath.
+/**
+ * RIPPLE GUARD — Cinematic Top-View Droplet Splash Controller
+ */
 
-window.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const splash = document.getElementById("splash");
   const site = document.getElementById("site");
+  let completed = false;
 
-  const SPLASH_DURATION_MS = 2200; // must roughly match the CSS animation timings above
+  function finishSplash() {
+    if (completed) return;
+    completed = true;
 
-  setTimeout(() => {
+    // Trigger canvas background water wave at center
+    if (typeof window.triggerWaterDrop === "function") {
+      window.triggerWaterDrop(window.innerWidth / 2, window.innerHeight / 2, 1.0);
+    }
+
     splash.classList.add("fade-out");
     site.classList.remove("hidden");
     site.classList.add("visible");
 
-    // Once faded out, remove it completely so it can't block clicks.
     setTimeout(() => {
       splash.style.display = "none";
-    }, 600);
-  }, SPLASH_DURATION_MS);
+    }, 850);
+  }
+
+  // Trigger impact water ripple wave at exact contact time (approx 1.15s)
+  setTimeout(() => {
+    if (!completed && typeof window.triggerWaterDrop === "function") {
+      window.triggerWaterDrop(window.innerWidth / 2, window.innerHeight / 2, 0.95);
+    }
+  }, 1150);
+
+  // Transition to main site as transparent ripples expand across screen (2.35s)
+  setTimeout(finishSplash, 2350);
+
+  // User click or keypress allows instant skip if desired
+  splash.addEventListener("click", finishSplash);
 });

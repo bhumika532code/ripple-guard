@@ -22,7 +22,7 @@ function buildScoreboard() {
       <td style="font-family:'JetBrains Mono',monospace;">${m.directDependents}</td>
       <td style="font-family:'JetBrains Mono',monospace;">${m.affectedAppsCount} / ${TOTAL_APPS}</td>
       <td class="action-pill">${riskLabel(m.trueRisk)}</td>
-      <td><a class="btn-table-simulate" href="propagation.html?node=${node.id}">Simulate →</a></td>
+      <td><a class="btn-table-simulate" href="propagation.html?node=${node.id}">Taint Analysis →</a></td>
     `;
     tbody.appendChild(row);
   });

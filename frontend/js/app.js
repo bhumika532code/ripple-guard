@@ -207,6 +207,21 @@ function drawDependencyGraph() {
       "data-id": node.id
     });
 
+    const title = createSvgElement("title", {});
+    if (isApp) {
+      title.textContent = `Application: ${node.name}\nTop-level consumer inheriting downstream risk.`;
+    } else {
+      const osv = window.OSV_DETAILS ? window.OSV_DETAILS[node.id] : null;
+      let desc = node.description || "Dependency Package";
+      if (osv && osv.length > 0) {
+        desc = osv[0].summary || osv[0].details || osv[0].description || desc;
+      }
+      // Truncate overly long descriptions for tooltip readability
+      if (desc.length > 200) desc = desc.substring(0, 197) + "...";
+      title.textContent = `${node.name}\n${desc}\n\nReported Vuln: ${node.vuln} | True Risk: ${m.trueRisk}`;
+    }
+    circle.appendChild(title);
+
     circle.addEventListener("click", () => showNodeDetails(node.id));
 
     const label = createSvgElement("text", {
@@ -295,7 +310,7 @@ function showNodeDetails(nodeId) {
       ${hiddenRiskWarning}
 
       <button class="btn-simulate-jump" onclick="jumpToSimulation('${node.id}')">
-        <span>Simulate Laser Propagation ↓</span>
+        <span>Run Taint Analysis ↓</span>
       </button>
     </div>
   `;
@@ -344,7 +359,7 @@ function buildScoreboard() {
       <td class="action-pill">${riskLabel(m.trueRisk)}</td>
       <td>
         <button class="btn-table-simulate" onclick="jumpToSimulation('${node.id}')">
-          <span>Simulate →</span>
+          <span>Taint Analysis →</span>
         </button>
       </td>
     `;
@@ -411,7 +426,7 @@ function resetPropagation() {
   if (panel) {
     panel.innerHTML = `
       <div class="info-placeholder">
-        Select a package above or click any node to simulate how a compromised vulnerability ripples upward through the dependency graph.
+        Select a package above or click any node to run a taint analysis to see how a compromised vulnerability ripples upward through the dependency graph.
       </div>
     `;
   }

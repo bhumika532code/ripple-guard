@@ -30,6 +30,20 @@ function drawGraph() {
       class: "graph-node"
     });
 
+    const title = createSvgElement("title", {});
+    if (isApp) {
+      title.textContent = `Application: ${node.name}\nTop-level consumer inheriting downstream risk.`;
+    } else {
+      const osv = window.OSV_DETAILS ? window.OSV_DETAILS[node.id] : null;
+      let desc = node.description || "Dependency Package";
+      if (osv && osv.length > 0) {
+        desc = osv[0].summary || osv[0].details || osv[0].description || desc;
+      }
+      if (desc.length > 200) desc = desc.substring(0, 197) + "...";
+      title.textContent = `${node.name}\n${desc}\n\nReported Vuln: ${node.vuln} | True Risk: ${METRICS[node.id].trueRisk}`;
+    }
+    circle.appendChild(title);
+
     if (node.type === "package") {
       circle.addEventListener("click", () => showNodeDetails(node.id));
     }
@@ -76,7 +90,7 @@ function showNodeDetails(nodeId) {
         <span class="legend-dot" style="background:${riskColor(m.trueRisk)}; color:${riskColor(m.trueRisk)};"></span>
         <span>${riskLabel(m.trueRisk)}</span>
       </div>
-      <p style="margin-top:10px;"><a class="btn-simulate-jump" href="propagation.html?node=${nodeId}">See full propagation simulation →</a></p>
+      <p style="margin-top:10px;"><a class="btn-simulate-jump" href="propagation.html?node=${nodeId}">See full taint analysis →</a></p>
     </div>
   `;
 }

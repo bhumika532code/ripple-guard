@@ -80,6 +80,20 @@ function drawGraph() {
       class: "graph-node"
     });
 
+    const title = createSvgElement("title", {});
+    if (isApp) {
+      title.textContent = `Application: ${node.name}\nTop-level consumer inheriting downstream risk.`;
+    } else {
+      const osv = window.OSV_DETAILS ? window.OSV_DETAILS[node.id] : null;
+      let desc = node.description || "Dependency Package";
+      if (osv && osv.length > 0) {
+        desc = osv[0].summary || osv[0].details || osv[0].description || desc;
+      }
+      if (desc.length > 200) desc = desc.substring(0, 197) + "...";
+      title.textContent = `${node.name}\n${desc}\n\nReported Vuln: ${node.vuln} | True Risk: ${METRICS[node.id].trueRisk}`;
+    }
+    circle.appendChild(title);
+
     if (node.type === "package") {
       circle.addEventListener("click", () => {
         compromisedId = node.id;
@@ -107,7 +121,7 @@ function updateInfoPanel() {
   if (!panel) return;
 
   if (!compromisedId) {
-    panel.innerHTML = `<div class="info-placeholder">Pick a package above to simulate a compromise.</div>`;
+    panel.innerHTML = `<div class="info-placeholder">Pick a package above to run a taint analysis on a compromise.</div>`;
     return;
   }
 

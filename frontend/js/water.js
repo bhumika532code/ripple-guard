@@ -151,14 +151,8 @@
 
     time += 0.015;
 
-    // 1. Dark purple/navy base gradient
-    const bgGradient = ctx.createLinearGradient(0, 0, width, height);
-    bgGradient.addColorStop(0, "#080713");   // deep abyss purple
-    bgGradient.addColorStop(0.45, "#0b0c20"); // rich navy
-    bgGradient.addColorStop(0.85, "#0e0d26"); // subtle dark violet undertone
-    bgGradient.addColorStop(1, "#06070d");   // near black obsidian
-    ctx.fillStyle = bgGradient;
-    ctx.fillRect(0, 0, width, height);
+    // 1. Transparent water surface
+    ctx.clearRect(0, 0, width, height);
 
     // 2. Ambient silky caustic water waves
     ctx.save();
@@ -225,14 +219,8 @@
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      const wakeFill = ctx.createRadialGradient(
-        wake.x, wake.y, 0,
-        wake.x, wake.y, wake.radius
-      );
-      wakeFill.addColorStop(0, `rgba(147, 197, 253, ${currentOpacity * 0.25})`);
-      wakeFill.addColorStop(0.8, `rgba(56, 189, 248, ${currentOpacity * 0.1})`);
-      wakeFill.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = wakeFill;
+      // Simplified wake fill to remove expensive radial gradient
+      ctx.fillStyle = `rgba(56, 189, 248, ${currentOpacity * 0.15})`;
       ctx.fill();
       ctx.restore();
     }
@@ -255,8 +243,6 @@
       ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
       ctx.strokeStyle = `rgba(56, 189, 248, ${r.opacity * 0.75})`;
       ctx.lineWidth = Math.max(0.6, 2.2 * (1 - progress));
-      ctx.shadowColor = "rgba(56, 189, 248, 0.4)";
-      ctx.shadowBlur = 6;
       ctx.stroke();
 
       // Secondary interior ring

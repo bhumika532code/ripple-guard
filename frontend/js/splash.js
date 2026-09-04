@@ -11,11 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (completed) return;
     completed = true;
 
-    // Trigger canvas background water wave at center
-    if (typeof window.triggerWaterDrop === "function") {
-      window.triggerWaterDrop(window.innerWidth / 2, window.innerHeight / 2, 1.0);
-    }
-
+    // Fade out splash gracefully
     splash.classList.add("fade-out");
     site.classList.remove("hidden");
     site.classList.add("visible");

@@ -1,0 +1,19 @@
+{
+  "name": "vulnerable-test-app",
+  "version": "1.0.0",
+  "description": "A sample app with known vulnerabilities to test Ripple Guard",
+  "main": "index.js",
+  "dependencies": {
+    "express": "4.17.1",
+    "lodash": "4.17.15",
+    "mongoose": "5.10.0",
+    "axios": "0.21.1",
+    "moment": "2.24.0",
+    "request": "2.88.2",
+    "jsonwebtoken": "8.5.1"
+  },
+  "devDependencies": {
+    "jest": "26.6.3",
+    "webpack": "4.44.2"
+  }
+}

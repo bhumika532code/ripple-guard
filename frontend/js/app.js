@@ -12,6 +12,12 @@
 let currentSimulationNode = null;
 let activeLaserTimers = [];
 
+// New global state for Threat Intel
+window.SEVERITY_DIST = null;
+window.DIRECT_VS_TRANSITIVE = null;
+window.VULN_TRACES = null;
+window.SMART_FIXES = null;
+
 // ==========================================================================
 // 1. PROJECT UPLOAD & ECOSYSTEM STATE
 // ==========================================================================
@@ -69,47 +75,61 @@ async function handleUploadedFile(file) {
   const uploadTitle = document.getElementById("upload-dropzone-title");
   const uploadSub = document.getElementById("upload-dropzone-sub");
 
-  if (file.name.endsWith(".json") || file.name.includes("package")) {
-    if (uploadTitle) uploadTitle.textContent = `Analyzing ${file.name}...`;
-    if (uploadSub) uploadSub.innerHTML = `<span style="color:#38bdf8;">Querying real OSV Vulnerability Database...</span>`;
+  // Max 10 MB
+  const MAX_SIZE = 10 * 1024 * 1024;
+  if (file.size > MAX_SIZE) {
+    if (uploadTitle) uploadTitle.textContent = `File too large: ${file.name}`;
+    if (uploadSub) uploadSub.textContent = `Maximum file size is 10 MB.`;
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append('packageJson', file);
+  if (uploadTitle) uploadTitle.textContent = `Analyzing ${file.name}...`;
+  if (uploadSub) uploadSub.innerHTML = `<span style="color:#38bdf8;">Querying real OSV Vulnerability Database...</span>`;
 
-    try {
-      const response = await fetch('http://localhost:3000/api/analyze', {
-        method: 'POST',
-        body: formData
-      });
-      
-      if (!response.ok) throw new Error('Backend analysis failed');
-      
-      const data = await response.json();
-      
-      // Update global state
-      NODES = data.nodes;
-      EDGES = data.edges;
-      window.OSV_DETAILS = data.osvDetails || {};
+  const formData = new FormData();
+  formData.append('manifestFile', file);
+  formData.append('originalName', file.name);
 
-      if (uploadTitle) uploadTitle.textContent = `Project Loaded: ${file.name}`;
-      if (uploadSub) uploadSub.innerHTML = `<span style="color:#22c55e;">✔ Analyzed ${NODES.length} nodes via OSV API</span>`;
-
-      // Re-initialize UI with new data
-      initEcosystemState();
-      drawDependencyGraph();
-      buildScoreboard();
-      initPropagationControls();
-      initAIFixControls();
-      resetPropagation();
-      
-    } catch (err) {
-      console.error(err);
-      if (uploadTitle) uploadTitle.textContent = `Error analyzing ${file.name}`;
-      if (uploadSub) uploadSub.textContent = `Make sure the local backend is running on port 3000.`;
+  try {
+    const response = await fetch('http://localhost:3000/api/analyze', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || 'Backend analysis failed');
     }
-  } else {
-    if (uploadTitle) uploadTitle.textContent = `Invalid file: ${file.name}`;
-    if (uploadSub) uploadSub.textContent = `Please upload a package.json file.`;
+    
+    const data = await response.json();
+    
+    // Update global state
+    NODES = data.nodes;
+    EDGES = data.edges;
+    window.OSV_DETAILS = data.osvDetails || {};
+    window.SEVERITY_DIST = data.severityDist || null;
+    window.DIRECT_VS_TRANSITIVE = data.directVsTransitive || null;
+    window.VULN_TRACES = data.vulnTraces || null;
+    window.SMART_FIXES = data.smartFixes || null;
+
+    if (uploadTitle) uploadTitle.textContent = `Project Loaded: ${file.name}`;
+    const sourcesUsed = (data.sources || ['OSV']).join(' + ');
+    if (uploadSub) uploadSub.innerHTML = `<span style="color:#22c55e;">✔ Analyzed ${NODES.length} nodes (${data.ecosystem || 'auto-detected'}) via ${sourcesUsed}</span>`;
+
+    // Re-initialize UI with new data
+    initEcosystemState();
+    drawDependencyGraph();
+    buildScoreboard();
+    if (typeof buildThreatIntelDashboard === 'function') buildThreatIntelDashboard();
+    initPropagationControls();
+    initAIFixControls();
+    if (typeof buildCombinedOverview === 'function') buildCombinedOverview();
+    resetPropagation();
+    
+  } catch (err) {
+    console.error(err);
+    if (uploadTitle) uploadTitle.textContent = `Error analyzing ${file.name}`;
+    if (uploadSub) uploadSub.textContent = err.message || `Make sure the local backend is running on port 3000.`;
   }
 }
 
@@ -709,21 +729,150 @@ function updatePropagationPanel(node, affected, hopGroups) {
 }
 
 // ==========================================================================
-// 5. SECTION 04: AI FIX RECOMMENDATION
+// 5. SECTION 03: THREAT INTELLIGENCE DASHBOARD
+// ==========================================================================
+
+function buildThreatIntelDashboard() {
+  if (!window.SEVERITY_DIST) return;
+
+  // 1. Severity Distribution
+  const sevContainer = document.getElementById("severity-dist-container");
+  if (sevContainer) {
+    const total = Object.values(window.SEVERITY_DIST).reduce((a, b) => a + b, 0);
+    const renderBar = (label, count, className) => {
+      const pct = total > 0 ? (count / total) * 100 : 0;
+      return `
+        <div class="severity-bar-row">
+          <span class="severity-bar-label ${className}">${label}</span>
+          <div class="severity-bar-track">
+            <div class="severity-bar-fill ${className}" style="width: ${pct}%"></div>
+          </div>
+          <span class="severity-bar-count">${count}</span>
+        </div>
+      `;
+    };
+
+    sevContainer.innerHTML = `
+      ${renderBar("CRITICAL", window.SEVERITY_DIST.CRITICAL, "critical")}
+      ${renderBar("HIGH", window.SEVERITY_DIST.HIGH, "high")}
+      ${renderBar("MEDIUM", window.SEVERITY_DIST.MEDIUM, "medium")}
+      ${renderBar("LOW", window.SEVERITY_DIST.LOW, "low")}
+      <div class="severity-total-row">
+        <span class="severity-total-label">Total Vulnerabilities</span>
+        <span class="severity-total-val">${total}</span>
+      </div>
+    `;
+  }
+
+  // 2. Direct vs Transitive
+  const dtContainer = document.getElementById("direct-transitive-container");
+  if (dtContainer && window.DIRECT_VS_TRANSITIVE) {
+    const dt = window.DIRECT_VS_TRANSITIVE;
+    const totalVulns = dt.direct + dt.transitive;
+    const directPct = totalVulns > 0 ? (dt.direct / totalVulns) * 100 : 50;
+    const transPct = totalVulns > 0 ? (dt.transitive / totalVulns) * 100 : 50;
+
+    dtContainer.innerHTML = `
+      <div class="dt-stat-row">
+        <div class="dt-stat-box">
+          <span class="dt-stat-box-label">Direct Vulns</span>
+          <span class="dt-stat-box-val direct">${dt.direct}</span>
+          <div class="dt-stat-box-sub">in ${dt.directPackages} packages</div>
+        </div>
+        <div class="dt-stat-box">
+          <span class="dt-stat-box-label">Transitive Vulns</span>
+          <span class="dt-stat-box-val transitive">${dt.transitive}</span>
+          <div class="dt-stat-box-sub">in ${dt.transitivePackages} packages</div>
+        </div>
+      </div>
+      <div style="margin-top: 8px;">
+        <div class="dt-comparison-bar">
+          <div class="dt-bar-direct" style="width: ${directPct}%"></div>
+          <div class="dt-bar-transitive" style="width: ${transPct}%"></div>
+        </div>
+        <div class="dt-bar-legend">
+          <div class="dt-legend-item">
+            <span class="dt-legend-dot direct"></span>
+            <span>Direct Dependency (${Math.round(directPct)}%)</span>
+          </div>
+          <div class="dt-legend-item">
+            <span class="dt-legend-dot transitive"></span>
+            <span>Transitive (Indirect) (${Math.round(transPct)}%)</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. Vulnerability Trace Paths
+  const tracesContainer = document.getElementById("trace-paths-container");
+  if (tracesContainer && window.VULN_TRACES) {
+    if (Object.keys(window.VULN_TRACES).length === 0) {
+      tracesContainer.innerHTML = `<div class="no-vulns-message">No dependency vulnerabilities found!</div>`;
+    } else {
+      let html = '';
+      for (const [vulnId, path] of Object.entries(window.VULN_TRACES)) {
+        // Find highest severity for this package
+        const vulns = window.OSV_DETAILS[vulnId] || [];
+        let maxSev = "LOW";
+        if (vulns.some(v => v.severity === 'CRITICAL')) maxSev = "CRITICAL";
+        else if (vulns.some(v => v.severity === 'HIGH')) maxSev = "HIGH";
+        else if (vulns.some(v => v.severity === 'MEDIUM')) maxSev = "MEDIUM";
+        
+        let pathHtml = '';
+        path.forEach((node, i) => {
+          if (i > 0) {
+            pathHtml += `
+              <span class="trace-arrow">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </span>
+            `;
+          }
+          let nodeClass = "mid-node";
+          if (i === 0) nodeClass = "app-node";
+          if (i === path.length - 1) nodeClass = "vuln-node";
+          pathHtml += `<span class="trace-node ${nodeClass}">${node}</span>`;
+        });
+
+        html += `
+          <div class="trace-path-item">
+            ${pathHtml}
+            <span class="trace-vuln-badge ${maxSev.toLowerCase()}">${maxSev}</span>
+          </div>
+        `;
+      }
+      tracesContainer.innerHTML = html;
+    }
+  }
+}
+
+// ==========================================================================
+// 6. SECTION 05: SMART FIX RECOMMENDATIONS (DTReme)
 // ==========================================================================
 
 function initAIFixControls() {
   const select = document.getElementById("fix-node-select");
   const btnGenerate = document.getElementById("btn-generate-fix");
   const resultsPanel = document.getElementById("ai-fix-results");
+  const toggleBtn = document.getElementById("smart-fix-toggle");
+  const toolbox = document.getElementById("smart-fix-toolbox");
+
+  if (toggleBtn && toolbox) {
+    toggleBtn.addEventListener("click", () => {
+      toolbox.classList.toggle("closed");
+    });
+  }
 
   if (!select) return;
-  select.innerHTML = `<option value="">Choose a package to analyze…</option>`;
+  select.innerHTML = `<option value="">Choose a direct dependency to analyze…</option>`;
 
-  NODES.filter(n => n.type === "package").forEach(n => {
+  // Only allow selecting direct dependencies for smart fixes
+  NODES.filter(n => n.layer === 1).forEach(n => {
     const opt = document.createElement("option");
     opt.value = n.id;
-    opt.textContent = `${n.name} (Reported Vuln: ${n.vuln})`;
+    opt.textContent = `${n.name}`;
     select.appendChild(opt);
   });
 
@@ -731,7 +880,13 @@ function initAIFixControls() {
     btnGenerate.addEventListener("click", () => {
       const nodeId = select.value;
       if (!nodeId) {
-        alert("Please select a package to analyze.");
+        // If no node selected, show the best recommendation automatically
+        if (window.SMART_FIXES && window.SMART_FIXES.length > 0) {
+          generateAIFix(window.SMART_FIXES[0].dep, resultsPanel);
+          select.value = window.SMART_FIXES[0].dep;
+        } else {
+          alert("Please select a direct dependency to analyze, or ensure the ecosystem has vulnerabilities.");
+        }
         return;
       }
       generateAIFix(nodeId, resultsPanel);
@@ -749,80 +904,194 @@ function generateAIFix(nodeId, resultsPanel) {
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 2s linear infinite;">
         <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
       </svg>
-      <span>AI Agent retrieving live OSV vulnerability details for <strong>${node.name}</strong>...</span>
+      <span>Analyzing propagation trees for <strong>${node.name}</strong>...</span>
     </div>
   `;
 
   setTimeout(() => {
-    const vulns = window.OSV_DETAILS && window.OSV_DETAILS[nodeId] ? window.OSV_DETAILS[nodeId] : [];
+    // Find smart fix for this node
+    const smartFix = (window.SMART_FIXES || []).find(f => f.dep === nodeId);
     
-    let errorText = "No known vulnerabilities found in OSV database.";
-    let fixText = "You are safe! No action required.";
-    let errorColor = "#34d399";
-    let fixColor = "#34d399";
-    let errorBg = "rgba(52, 211, 153, 0.1)";
-    let errorBorder = "rgba(52, 211, 153, 0.3)";
-    let iconColor = "#34d399";
-
-    if (vulns.length > 0) {
-      const vuln = vulns[0];
-      errorText = vuln.summary || vuln.details || "Unknown vulnerability type detected.";
-      const aliases = vuln.aliases ? ` (Aliases: ${vuln.aliases.join(", ")})` : "";
-      errorText = `${errorText}${aliases}`;
-      
-      const fixVersions = vuln.affected && vuln.affected[0] && vuln.affected[0].ranges && vuln.affected[0].ranges[0] && vuln.affected[0].ranges[0].events 
-        ? vuln.affected[0].ranges[0].events.map(e => e.fixed).filter(Boolean) : [];
-        
-      if (fixVersions.length > 0) {
-        fixText = `<strong>Update Version:</strong> Upgrade ${node.name} to version ${fixVersions[0]} which contains the official security patch.`;
-      } else {
-        fixText = `<strong>Apply Workaround or Remove:</strong> No patched version found in OSV record. Consider migrating to an alternative library or applying input validation manually.`;
-      }
-      
-      errorColor = "#fca5a5";
-      errorBg = "rgba(248, 113, 113, 0.1)";
-      errorBorder = "rgba(248, 113, 113, 0.3)";
-      iconColor = "#f87171";
+    if (!smartFix) {
+      resultsPanel.innerHTML = `
+        <div class="no-vulns-message">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <strong>${node.name}</strong> is healthy.<br>
+          Upgrading this dependency will not fix any known vulnerabilities in your tree.
+        </div>
+      `;
+      return;
     }
 
+    // Build impact badges
+    let impactHtml = '';
+    if (smartFix.severityBreakdown.CRITICAL > 0) impactHtml += `<span class="trace-vuln-badge critical">${smartFix.severityBreakdown.CRITICAL} CRITICAL</span> `;
+    if (smartFix.severityBreakdown.HIGH > 0) impactHtml += `<span class="trace-vuln-badge high">${smartFix.severityBreakdown.HIGH} HIGH</span> `;
+    
+    // Build fix urgency badge
+    let urgencyHtml = '';
+    if (smartFix.fixLagDays !== null) {
+      const days = smartFix.fixLagDays;
+      if (days > 180) urgencyHtml = `<span class="fix-lag-badge urgent">⚠ Fix available ${days} days ago — Patch Overdue</span>`;
+      else if (days > 30) urgencyHtml = `<span class="fix-lag-badge warning">Fix available ${days} days ago</span>`;
+      else urgencyHtml = `<span class="fix-lag-badge info">Recent fix (${days} days ago)</span>`;
+    }
+
+    const actionText = smartFix.fixVersion 
+      ? `Upgrade <strong>${node.name}</strong> to version <strong>${smartFix.fixVersion}</strong>`
+      : `Update <strong>${node.name}</strong> to latest stable version`;
+
     resultsPanel.innerHTML = `
-      <div style="margin-bottom: 20px;">
-        <h3 style="color:var(--text-bright); font-size: 16px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          Detected Error (OSV Match)
-        </h3>
-        <div style="background:${errorBg}; border:1px solid ${errorBorder}; border-radius:8px; padding:16px; color:${errorColor}; font-size:14px; line-height:1.5;">
-          <strong>Vulnerability:</strong> ${errorText}<br/>
-          <strong style="display:inline-block; margin-top:8px;">Package:</strong> ${node.name} (True Risk Score: ${METRICS[nodeId] ? METRICS[nodeId].trueRisk : 0})
+      <div class="smart-fix-card">
+        <div class="smart-fix-header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="smart-fix-pkg-name">${node.name}</span>
+            ${urgencyHtml}
+          </div>
+          <span class="smart-fix-impact-badge">
+            Eliminates ${smartFix.totalFixable} Vulnerabilities
+          </span>
         </div>
-      </div>
-      
-      <div>
-        <h3 style="color:var(--text-bright); font-size: 16px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2">
-            <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"></path>
-          </svg>
-          AI Recommended Fix
-        </h3>
-        <div style="background:rgba(52, 211, 153, 0.1); border:1px solid rgba(52, 211, 153, 0.3); border-radius:8px; padding:16px; color:#6ee7b7; font-size:14px; line-height:1.5;">
-          ${fixText}
+
+        <div class="smart-fix-stats">
+          <div class="smart-fix-stat">
+            <span class="smart-fix-stat-label">Direct Vulns Fixed</span>
+            <span class="smart-fix-stat-val" style="color: #f97316;">${smartFix.ownVulnCount}</span>
+          </div>
+          <div class="smart-fix-stat">
+            <span class="smart-fix-stat-label">Transitive Vulns Fixed</span>
+            <span class="smart-fix-stat-val" style="color: #a78bfa;">${smartFix.transitiveVulnCount}</span>
+          </div>
+          <div class="smart-fix-stat">
+            <span class="smart-fix-stat-label">Highest Impact</span>
+            <div style="margin-top: 2px;">${impactHtml || '<span class="trace-vuln-badge medium">MEDIUM</span>'}</div>
+          </div>
         </div>
+
+        <div class="smart-fix-action">
+          <svg class="smart-fix-action-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22V8M5 15l7-7 7 7"/>
+          </svg>
+          <span class="smart-fix-action-text">${actionText}</span>
+        </div>
+
+        ${smartFix.affectedTransitives.length > 0 ? `
+          <div class="smart-fix-transitives">
+            This single upgrade resolves transitive vulnerabilities in: 
+            <strong>${smartFix.affectedTransitives.join(', ')}</strong>
+          </div>
+        ` : ''}
       </div>
     `;
-  }, 1000);
+  }, 600);
 }
 
 // ==========================================================================
-// 6. INITIALIZATION
+// 7. SECTION 06: COMBINED OVERVIEW TOOLBOX
+// ==========================================================================
+
+function buildCombinedOverview() {
+  const toolbox = document.getElementById("combined-overview-toolbox");
+  const toggleBtn = document.getElementById("combined-overview-toggle");
+  const content = document.getElementById("combined-overview-content");
+  
+  if (toggleBtn && toolbox && !toggleBtn.hasListener) {
+    toggleBtn.addEventListener("click", () => {
+      toolbox.classList.toggle("closed");
+    });
+    toggleBtn.hasListener = true;
+  }
+
+  if (!content) return;
+
+  if (!window.SEVERITY_DIST || !NODES || NODES.length === 0) {
+    content.innerHTML = `<div class="intel-placeholder" style="padding: 10px 0;">Upload a manifest to view combined stats</div>`;
+    return;
+  }
+
+  // Calculate highest risk score
+  let maxRisk = 0;
+  Object.values(METRICS).forEach(m => {
+    if (m.trueRisk > maxRisk) maxRisk = m.trueRisk;
+  });
+
+  // Get Top 3 Threats
+  const allNodes = NODES.filter(n => n.type === 'package').sort((a, b) => METRICS[b.id].trueRisk - METRICS[a.id].trueRisk);
+  const topThreats = allNodes.slice(0, 3);
+  
+  let threatsHtml = '';
+  topThreats.forEach(n => {
+    const risk = METRICS[n.id].trueRisk;
+    if (risk > 0) {
+      threatsHtml += `
+        <div class="overview-threat-item">
+          <span>${n.name}</span>
+          <span style="color: #fca5a5; font-family: 'JetBrains Mono', monospace;">${risk.toFixed(1)}</span>
+        </div>
+      `;
+    }
+  });
+
+  if (!threatsHtml) {
+    threatsHtml = `<div style="font-size: 11px; color: #34d399;">No active threats found.</div>`;
+  }
+
+  // Get Top Fix Recommendation
+  let topFixHtml = `<div style="font-size: 11px; color: var(--text-dim);">No fixes available</div>`;
+  if (window.SMART_FIXES && window.SMART_FIXES.length > 0) {
+    const topFix = window.SMART_FIXES[0];
+    const node = NODES.find(n => n.id === topFix.dep);
+    if (node) {
+      topFixHtml = `
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 8px; border-radius: 6px; margin-top: 8px;">
+          <div style="font-size: 11px; color: #34d399; margin-bottom: 2px;">Recommended Action</div>
+          <div style="font-size: 12px; color: var(--text-bright);">Upgrade <strong>${node.name}</strong></div>
+          <div style="font-size: 10px; color: var(--text-dim); margin-top: 2px;">Fixes ${topFix.totalFixable} vulnerabilities</div>
+        </div>
+      `;
+    }
+  }
+
+  content.innerHTML = `
+    <div class="overview-grid">
+      <div class="overview-stat-box">
+        <span class="overview-stat-label">Packages</span>
+        <span class="overview-stat-val">${NODES.filter(n => n.type === 'package').length}</span>
+      </div>
+      <div class="overview-stat-box">
+        <span class="overview-stat-label">Max Risk</span>
+        <span class="overview-stat-val" style="color: #fca5a5;">${maxRisk.toFixed(1)}</span>
+      </div>
+    </div>
+    
+    <div class="overview-list-title">Top Threats</div>
+    <div style="margin-bottom: 12px;">
+      ${threatsHtml}
+    </div>
+    
+    ${topFixHtml}
+  `;
+  
+  // Auto-open toolbox on load if there are threats
+  if (maxRisk > 0 && toolbox.classList.contains("closed")) {
+    toolbox.classList.remove("closed");
+  }
+}
+
+// ==========================================================================
+// 8. INITIALIZATION
 // ==========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
   initUploadArea();
   drawDependencyGraph();
   buildScoreboard();
+  if (typeof buildThreatIntelDashboard === 'function') buildThreatIntelDashboard();
   initPropagationControls();
   initAIFixControls();
+  if (typeof buildCombinedOverview === 'function') buildCombinedOverview();
   drawPropagationBaseGraph(null, new Map());
 });

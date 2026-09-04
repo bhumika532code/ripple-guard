@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RIPPLE GUARD — Dependency Risk Analysis</title>
+  <title>DomiNode — Dependency Risk Analysis</title>
   <meta name="description"
     content="Analyze how dependency vulnerabilities propagate through your software stack. Map dependencies, identify high-risk packages, and visualize compromise cascades." />
   <link rel="stylesheet" href="css/style.css" />
@@ -60,7 +60,7 @@
     </div>
 
     <div class="splash-caption">
-      <span class="splash-title">RIPPLE GUARD</span>
+      <span class="splash-title">DomiNode</span>
       <span class="splash-sub">Dependency Risk Analysis</span>
       <span class="splash-skip-hint">Click anywhere to skip intro</span>
     </div>
@@ -75,13 +75,11 @@
     <!-- Sticky Glass Navigation Header -->
     <header class="app-navbar">
       <a href="#site" class="nav-brand">
-        <div class="brand-icon-drop">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-          </svg>
+        <div class="brand-icon-drop" style="width: 32px; height: 32px; margin-right: 10px;">
+          <img src="assets/dominode-logo.png" alt="DomiNode Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px;" />
         </div>
         <div class="brand-text-group">
-          <span class="brand-name">RIPPLE GUARD</span>
+          <span class="brand-name">DomiNode</span>
           <span class="brand-subtitle">Dependency Risk Analysis</span>
         </div>
       </a>
@@ -89,8 +87,8 @@
       <nav class="nav-links">
         <a class="nav-item" href="#section-graph">01 Graph</a>
         <a class="nav-item" href="#section-scoreboard">02 Scoreboard</a>
-        <a class="nav-item" href="#section-propagation">03 Simulator</a>
-        <a class="nav-item" href="#section-fix">04 AI Fix</a>
+        <a class="nav-item" href="#section-intel">03 Intel</a>
+        <a class="nav-item" href="#section-propagation">04 Simulator</a>
       </nav>
 
       <div class="nav-status-badge">
@@ -107,7 +105,7 @@
         </div>
 
         <h1 class="hero-title">
-          <span class="title-water-accent">RIPPLE GUARD</span>
+          <span class="title-water-accent">DomiNode</span>
         </h1>
 
         <h2 class="hero-subtitle">Dependency Risk Analysis</h2>
@@ -121,7 +119,7 @@
         <!-- Project Upload Area -->
         <div class="upload-panel">
           <div class="upload-dropzone" id="upload-dropzone">
-            <input type="file" id="project-file-input" accept=".json,application/json" style="display:none;" />
+            <input type="file" id="project-file-input" style="display:none;" />
             <div class="upload-icon-circle">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round">
@@ -132,9 +130,9 @@
             </div>
             <div class="upload-title" id="upload-dropzone-title">Upload Project Manifest</div>
             <div class="upload-sub" id="upload-dropzone-sub">
-              Drag & drop your <span>package.json</span> or click to browse files
+              Drag & drop your <span>dependency manifest</span> or click to browse files
             </div>
-            <div class="upload-meta-info">Supports npm package.json, lockfiles, or ecosystem manifests</div>
+            <div class="upload-meta-info">Supports package.json, requirements.txt, pom.xml, build.gradle, Gemfile, go.mod, Cargo.toml, composer.json, pubspec.yaml & more</div>
           </div>
 
           <!-- Active Ecosystem Summary Strip -->
@@ -259,12 +257,72 @@
 
 
         <!-- ===================================================================
-             SECTION 03: PROPAGATION SIMULATOR
+             SECTION 03: THREAT INTELLIGENCE DASHBOARD
+             =================================================================== -->
+        <section id="section-intel" class="analysis-section">
+          <div class="section-header-row">
+            <div class="section-title-group">
+              <span class="section-num">SECTION 03</span>
+              <h2 class="section-title">Threat Intelligence</h2>
+              <p class="section-desc">
+                Research-backed analysis of vulnerability severity distribution, attack surface composition, and dependency trace paths.
+              </p>
+            </div>
+          </div>
+
+          <div class="threat-intel-grid">
+            <!-- Card 1: Severity Distribution -->
+            <div class="glass-panel intel-card">
+              <div class="intel-card-header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--water-cyan)" stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+                <span>Severity Distribution</span>
+              </div>
+              <div id="severity-dist-container" class="severity-dist-container">
+                <div class="intel-placeholder">Upload a manifest to view severity breakdown</div>
+              </div>
+            </div>
+
+            <!-- Card 2: Direct vs Transitive -->
+            <div class="glass-panel intel-card">
+              <div class="intel-card-header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--water-cyan)" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="16"></line>
+                  <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <span>Attack Surface Composition</span>
+              </div>
+              <div id="direct-transitive-container" class="direct-transitive-container">
+                <div class="intel-placeholder">Upload a manifest to view attack surface</div>
+              </div>
+            </div>
+
+            <!-- Card 3: Vulnerability Trace Paths -->
+            <div class="glass-panel intel-card intel-card-wide">
+              <div class="intel-card-header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--water-cyan)" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                <span>Vulnerability Trace Paths</span>
+              </div>
+              <p class="intel-card-desc">Exact dependency chain from your application root to each vulnerable package.</p>
+              <div id="trace-paths-container" class="trace-paths-container">
+                <div class="intel-placeholder">Upload a manifest to view vulnerability traces</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ===================================================================
+             SECTION 04: PROPAGATION SIMULATOR
              =================================================================== -->
         <section id="section-propagation" class="analysis-section">
           <div class="section-header-row">
             <div class="section-title-group">
-              <span class="section-num">SECTION 03</span>
+              <span class="section-num">SECTION 04</span>
               <h2 class="section-title">Propagation Simulator</h2>
               <p class="section-desc">
                 Select a vulnerable dependency and visualize how a compromise shoots energy pulses through connected
@@ -314,57 +372,68 @@
         </section>
 
 
-        <!-- ===================================================================
-             SECTION 04: AI FIX RECOMMENDATION
-             =================================================================== -->
-        <section id="section-fix" class="analysis-section">
-          <div class="section-header-row">
-            <div class="section-title-group">
-              <span class="section-num">SECTION 04</span>
-              <h2 class="section-title">AI Vulnerability Resolution</h2>
-              <p class="section-desc">
-                Consult the AI assistant to retrieve OSV vulnerability details and generate automated remediation steps.
-              </p>
-            </div>
-          </div>
-
-          <!-- Interactive Simulator Controls -->
-          <div class="simulator-controls-bar">
-            <div class="control-input-group">
-              <label for="fix-node-select" class="control-label">Compromised Package:</label>
-              <select id="fix-node-select">
-                <option value="">Choose a package to analyze…</option>
-              </select>
-            </div>
-
-            <div class="simulator-btn-group">
-              <button id="btn-generate-fix" class="btn-trigger-pulse"
-                style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #34d399; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path
-                    d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                </svg>
-                <span>Generate AI Fix</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="glass-panel" id="ai-fix-results" style="padding: 24px; display: none;">
-            <!-- Content will be injected here -->
-          </div>
-        </section>
-
       </div>
     </main>
 
     <!-- Footer -->
     <footer class="app-footer">
       <div class="footer-tagline">
-        RIPPLE GUARD — A vulnerability enters like a drop in still water, and ripples through the entire ecosystem.
+        DomiNode — A vulnerability enters like a drop in still water, and ripples through the entire ecosystem.
       </div>
       <div>Designed for Dependency Risk Analysis & Cascading Vulnerability Prevention</div>
     </footer>
+
+    <!-- =======================================================================
+         FLOATING TOOLBOXES
+         ======================================================================= -->
+    
+    <!-- Smart Fix Toolbox (Bottom Left) -->
+    <div id="smart-fix-toolbox" class="floating-toolbox bottom-left closed">
+      <div class="toolbox-header" id="smart-fix-toggle">
+        <div class="toolbox-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2">
+            <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"></path>
+          </svg>
+          Smart Fix Actions
+        </div>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </div>
+      <div class="toolbox-body">
+        <div class="toolbox-controls">
+          <select id="fix-node-select" class="toolbox-select">
+            <option value="">Choose a direct dependency…</option>
+          </select>
+          <button id="btn-generate-fix" class="toolbox-btn">Generate AI Fix</button>
+        </div>
+        <div id="ai-fix-results" class="toolbox-results">
+          <div class="intel-placeholder" style="padding: 10px 0;">Select a dependency to analyze</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Combined Overview Toolbox (Bottom Right) -->
+    <div id="combined-overview-toolbox" class="floating-toolbox bottom-right closed">
+      <div class="toolbox-header" id="combined-overview-toggle">
+        <div class="toolbox-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          Quick Overview
+        </div>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </div>
+      <div class="toolbox-body">
+        <div id="combined-overview-content">
+          <div class="intel-placeholder" style="padding: 10px 0;">Upload a manifest to view combined stats</div>
+        </div>
+      </div>
+    </div>
 
   </div>
 

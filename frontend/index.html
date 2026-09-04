@@ -7,7 +7,7 @@
   <title>RIPPLE GUARD — Dependency Risk Analysis</title>
   <meta name="description"
     content="Analyze how dependency vulnerabilities propagate through your software stack. Map dependencies, identify high-risk packages, and visualize compromise cascades." />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
@@ -90,6 +90,7 @@
         <a class="nav-item" href="#section-graph">01 Graph</a>
         <a class="nav-item" href="#section-scoreboard">02 Scoreboard</a>
         <a class="nav-item" href="#section-propagation">03 Simulator</a>
+        <a class="nav-item" href="#section-fix">04 AI Fix</a>
       </nav>
 
       <div class="nav-status-badge">
@@ -312,6 +313,48 @@
           </div>
         </section>
 
+
+        <!-- ===================================================================
+             SECTION 04: AI FIX RECOMMENDATION
+             =================================================================== -->
+        <section id="section-fix" class="analysis-section">
+          <div class="section-header-row">
+            <div class="section-title-group">
+              <span class="section-num">SECTION 04</span>
+              <h2 class="section-title">AI Vulnerability Resolution</h2>
+              <p class="section-desc">
+                Consult the AI assistant to retrieve OSV vulnerability details and generate automated remediation steps.
+              </p>
+            </div>
+          </div>
+
+          <!-- Interactive Simulator Controls -->
+          <div class="simulator-controls-bar">
+            <div class="control-input-group">
+              <label for="fix-node-select" class="control-label">Compromised Package:</label>
+              <select id="fix-node-select">
+                <option value="">Choose a package to analyze…</option>
+              </select>
+            </div>
+
+            <div class="simulator-btn-group">
+              <button id="btn-generate-fix" class="btn-trigger-pulse"
+                style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #34d399; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+                <span>Generate AI Fix</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-panel" id="ai-fix-results" style="padding: 24px; display: none;">
+            <!-- Content will be injected here -->
+          </div>
+        </section>
+
       </div>
     </main>
 
@@ -326,11 +369,11 @@
   </div>
 
   <!-- Scripts -->
-  <script src="water.js"></script>
-  <script src="data.js"></script>
-  <script src="shared.js"></script>
-  <script src="app.js"></script>
-  <script src="splash.js"></script>
+  <script src="js/water.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/shared.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/splash.js"></script>
 
 </body>
 

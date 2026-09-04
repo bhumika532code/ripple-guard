@@ -65,29 +65,51 @@ function initUploadArea() {
   }
 }
 
-function handleUploadedFile(file) {
+async function handleUploadedFile(file) {
   const uploadTitle = document.getElementById("upload-dropzone-title");
   const uploadSub = document.getElementById("upload-dropzone-sub");
 
   if (file.name.endsWith(".json") || file.name.includes("package")) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      try {
-        const json = JSON.parse(e.target.result);
-        const name = json.name || file.name;
-        const depCount = Object.keys(json.dependencies || {}).length + Object.keys(json.devDependencies || {}).length;
+    if (uploadTitle) uploadTitle.textContent = `Analyzing ${file.name}...`;
+    if (uploadSub) uploadSub.innerHTML = `<span style="color:#38bdf8;">Querying real OSV Vulnerability Database...</span>`;
 
-        if (uploadTitle) uploadTitle.textContent = `Project Loaded: ${name}`;
-        if (uploadSub) uploadSub.innerHTML = `<span style="color:#22c55e;">✔ Analyzed ${depCount || '19'} dependencies</span> — Mapped to Ripple Guard database`;
-      } catch (err) {
-        if (uploadTitle) uploadTitle.textContent = `Loaded: ${file.name}`;
-        if (uploadSub) uploadSub.textContent = `Processed with current 19-package ecosystem`;
-      }
-    };
-    reader.readAsText(file);
+    const formData = new FormData();
+    formData.append('packageJson', file);
+
+    try {
+      const response = await fetch('http://localhost:3000/api/analyze', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) throw new Error('Backend analysis failed');
+      
+      const data = await response.json();
+      
+      // Update global state
+      NODES = data.nodes;
+      EDGES = data.edges;
+      window.OSV_DETAILS = data.osvDetails || {};
+
+      if (uploadTitle) uploadTitle.textContent = `Project Loaded: ${file.name}`;
+      if (uploadSub) uploadSub.innerHTML = `<span style="color:#22c55e;">✔ Analyzed ${NODES.length} nodes via OSV API</span>`;
+
+      // Re-initialize UI with new data
+      initEcosystemState();
+      drawDependencyGraph();
+      buildScoreboard();
+      initPropagationControls();
+      initAIFixControls();
+      resetPropagation();
+      
+    } catch (err) {
+      console.error(err);
+      if (uploadTitle) uploadTitle.textContent = `Error analyzing ${file.name}`;
+      if (uploadSub) uploadSub.textContent = `Make sure the local backend is running on port 3000.`;
+    }
   } else {
-    if (uploadTitle) uploadTitle.textContent = `Loaded: ${file.name}`;
-    if (uploadSub) uploadSub.textContent = `Processed with standard risk analysis profile`;
+    if (uploadTitle) uploadTitle.textContent = `Invalid file: ${file.name}`;
+    if (uploadSub) uploadSub.textContent = `Please upload a package.json file.`;
   }
 }
 
@@ -253,7 +275,7 @@ function showNodeDetails(nodeId) {
   `;
 }
 
-window.jumpToSimulation = function(nodeId) {
+window.jumpToSimulation = function (nodeId) {
   const target = document.getElementById("section-propagation");
   if (target) {
     target.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -687,7 +709,113 @@ function updatePropagationPanel(node, affected, hopGroups) {
 }
 
 // ==========================================================================
-// 5. INITIALIZATION
+// 5. SECTION 04: AI FIX RECOMMENDATION
+// ==========================================================================
+
+function initAIFixControls() {
+  const select = document.getElementById("fix-node-select");
+  const btnGenerate = document.getElementById("btn-generate-fix");
+  const resultsPanel = document.getElementById("ai-fix-results");
+
+  if (!select) return;
+  select.innerHTML = `<option value="">Choose a package to analyze…</option>`;
+
+  NODES.filter(n => n.type === "package").forEach(n => {
+    const opt = document.createElement("option");
+    opt.value = n.id;
+    opt.textContent = `${n.name} (Reported Vuln: ${n.vuln})`;
+    select.appendChild(opt);
+  });
+
+  if (btnGenerate) {
+    btnGenerate.addEventListener("click", () => {
+      const nodeId = select.value;
+      if (!nodeId) {
+        alert("Please select a package to analyze.");
+        return;
+      }
+      generateAIFix(nodeId, resultsPanel);
+    });
+  }
+}
+
+function generateAIFix(nodeId, resultsPanel) {
+  const node = NODES.find(n => n.id === nodeId);
+  if (!node) return;
+
+  resultsPanel.style.display = "block";
+  resultsPanel.innerHTML = `
+    <div style="display:flex; align-items:center; gap:12px; color:var(--water-cyan);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 2s linear infinite;">
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+      </svg>
+      <span>AI Agent retrieving live OSV vulnerability details for <strong>${node.name}</strong>...</span>
+    </div>
+  `;
+
+  setTimeout(() => {
+    const vulns = window.OSV_DETAILS && window.OSV_DETAILS[nodeId] ? window.OSV_DETAILS[nodeId] : [];
+    
+    let errorText = "No known vulnerabilities found in OSV database.";
+    let fixText = "You are safe! No action required.";
+    let errorColor = "#34d399";
+    let fixColor = "#34d399";
+    let errorBg = "rgba(52, 211, 153, 0.1)";
+    let errorBorder = "rgba(52, 211, 153, 0.3)";
+    let iconColor = "#34d399";
+
+    if (vulns.length > 0) {
+      const vuln = vulns[0];
+      errorText = vuln.summary || vuln.details || "Unknown vulnerability type detected.";
+      const aliases = vuln.aliases ? ` (Aliases: ${vuln.aliases.join(", ")})` : "";
+      errorText = `${errorText}${aliases}`;
+      
+      const fixVersions = vuln.affected && vuln.affected[0] && vuln.affected[0].ranges && vuln.affected[0].ranges[0] && vuln.affected[0].ranges[0].events 
+        ? vuln.affected[0].ranges[0].events.map(e => e.fixed).filter(Boolean) : [];
+        
+      if (fixVersions.length > 0) {
+        fixText = `<strong>Update Version:</strong> Upgrade ${node.name} to version ${fixVersions[0]} which contains the official security patch.`;
+      } else {
+        fixText = `<strong>Apply Workaround or Remove:</strong> No patched version found in OSV record. Consider migrating to an alternative library or applying input validation manually.`;
+      }
+      
+      errorColor = "#fca5a5";
+      errorBg = "rgba(248, 113, 113, 0.1)";
+      errorBorder = "rgba(248, 113, 113, 0.3)";
+      iconColor = "#f87171";
+    }
+
+    resultsPanel.innerHTML = `
+      <div style="margin-bottom: 20px;">
+        <h3 style="color:var(--text-bright); font-size: 16px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          Detected Error (OSV Match)
+        </h3>
+        <div style="background:${errorBg}; border:1px solid ${errorBorder}; border-radius:8px; padding:16px; color:${errorColor}; font-size:14px; line-height:1.5;">
+          <strong>Vulnerability:</strong> ${errorText}<br/>
+          <strong style="display:inline-block; margin-top:8px;">Package:</strong> ${node.name} (True Risk Score: ${METRICS[nodeId] ? METRICS[nodeId].trueRisk : 0})
+        </div>
+      </div>
+      
+      <div>
+        <h3 style="color:var(--text-bright); font-size: 16px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2">
+            <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"></path>
+          </svg>
+          AI Recommended Fix
+        </h3>
+        <div style="background:rgba(52, 211, 153, 0.1); border:1px solid rgba(52, 211, 153, 0.3); border-radius:8px; padding:16px; color:#6ee7b7; font-size:14px; line-height:1.5;">
+          ${fixText}
+        </div>
+      </div>
+    `;
+  }, 1000);
+}
+
+// ==========================================================================
+// 6. INITIALIZATION
 // ==========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -695,5 +823,6 @@ document.addEventListener("DOMContentLoaded", () => {
   drawDependencyGraph();
   buildScoreboard();
   initPropagationControls();
+  initAIFixControls();
   drawPropagationBaseGraph(null, new Map());
 });

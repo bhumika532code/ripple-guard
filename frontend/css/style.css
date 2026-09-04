@@ -9,14 +9,14 @@
   --bg-abyss: #070612;
   --bg-deep-navy: #0a0f24;
   --bg-obsidian: #05060b;
-  
+
   /* Water & Glass Accents */
   --water-cyan: #38bdf8;
   --water-glow: rgba(56, 189, 248, 0.28);
   --water-cyan-bright: #00e5ff;
   --water-indigo: #818cf8;
   --water-blue-deep: #1e293b;
-  
+
   /* Glassmorphism Panels */
   --glass-bg: rgba(14, 16, 34, 0.65);
   --glass-bg-hover: rgba(22, 25, 48, 0.75);
@@ -35,13 +35,15 @@
   --risk-high: #e67e22;
   --risk-medium: #c9a227;
   --risk-low: #4c8c6b;
-  
+
   /* App Node Color */
   --node-app: #1e293b;
   --node-app-border: #38bdf8;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -127,19 +129,23 @@ body {
     opacity: 0;
     filter: blur(5px);
   }
+
   15% {
     opacity: 1;
     filter: blur(3px);
   }
+
   60% {
     transform: translate(-50%, -50%) scale(1.4);
     filter: blur(0.8px);
   }
+
   94% {
     transform: translate(-50%, -50%) scale(1.0);
     filter: blur(0px);
     opacity: 1;
   }
+
   100% {
     transform: translate(-50%, -50%) scale(1.4);
     opacity: 0;
@@ -159,10 +165,29 @@ body {
 }
 
 @keyframes ballShadowSync {
-  0% { transform: scale(1.8); opacity: 0.15; filter: blur(6px); }
-  70% { transform: scale(1.1); opacity: 0.6; filter: blur(2px); }
-  94% { transform: scale(0.9); opacity: 0.9; filter: blur(0.5px); }
-  100% { transform: scale(1.5); opacity: 0; filter: blur(3px); }
+  0% {
+    transform: scale(1.8);
+    opacity: 0.15;
+    filter: blur(6px);
+  }
+
+  70% {
+    transform: scale(1.1);
+    opacity: 0.6;
+    filter: blur(2px);
+  }
+
+  94% {
+    transform: scale(0.9);
+    opacity: 0.9;
+    filter: blur(0.5px);
+  }
+
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+    filter: blur(3px);
+  }
 }
 
 /* Transparent Liquid Water Ball Sphere */
@@ -171,18 +196,17 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, 
-    rgba(255, 255, 255, 0.9) 0%, 
-    rgba(255, 255, 255, 0.45) 12%, 
-    rgba(56, 189, 248, 0.2) 35%, 
-    rgba(10, 15, 36, 0.35) 70%, 
-    rgba(56, 189, 248, 0.55) 98%, 
-    rgba(255, 255, 255, 0.7) 100%
-  );
+  background: radial-gradient(circle at 35% 30%,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 255, 255, 0.45) 12%,
+      rgba(56, 189, 248, 0.2) 35%,
+      rgba(10, 15, 36, 0.35) 70%,
+      rgba(56, 189, 248, 0.55) 98%,
+      rgba(255, 255, 255, 0.7) 100%);
   border: 1px solid rgba(255, 255, 255, 0.55);
-  box-shadow: 
-    inset -3px -3px 7px rgba(0, 0, 0, 0.65), 
-    inset 3px 3px 6px rgba(255, 255, 255, 0.75), 
+  box-shadow:
+    inset -3px -3px 7px rgba(0, 0, 0, 0.65),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.75),
     0 0 16px rgba(56, 189, 248, 0.35);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
@@ -230,9 +254,20 @@ body {
 }
 
 @keyframes topviewImpactFlash {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
-  25% { opacity: 1; transform: translate(-50%, -50%) scale(2.0); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(3.8); }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(2.0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(3.8);
+  }
 }
 
 /* Transparent Circular Ripples (Top View) */
@@ -255,26 +290,39 @@ body {
   height: 8px;
   border-radius: 50%;
   border: 1.5px solid rgba(186, 230, 253, 0.45);
-  box-shadow: 
+  box-shadow:
     inset 0 0 14px rgba(56, 189, 248, 0.22),
     0 0 20px rgba(56, 189, 248, 0.25),
     0 0 2px rgba(255, 255, 255, 0.6);
-  background: radial-gradient(circle, 
-    transparent 65%, 
-    rgba(56, 189, 248, 0.03) 82%, 
-    rgba(255, 255, 255, 0.08) 94%, 
-    transparent 100%
-  );
+  background: radial-gradient(circle,
+      transparent 65%,
+      rgba(56, 189, 248, 0.03) 82%,
+      rgba(255, 255, 255, 0.08) 94%,
+      transparent 100%);
   opacity: 0;
   pointer-events: none;
   animation: transparentRippleSpread 2.0s cubic-bezier(0.18, 0.6, 0.35, 1) forwards;
 }
 
-.tr-1 { animation-delay: 1.15s; }
-.tr-2 { animation-delay: 1.30s; }
-.tr-3 { animation-delay: 1.48s; }
-.tr-4 { animation-delay: 1.68s; }
-.tr-5 { animation-delay: 1.90s; }
+.tr-1 {
+  animation-delay: 1.15s;
+}
+
+.tr-2 {
+  animation-delay: 1.30s;
+}
+
+.tr-3 {
+  animation-delay: 1.48s;
+}
+
+.tr-4 {
+  animation-delay: 1.68s;
+}
+
+.tr-5 {
+  animation-delay: 1.90s;
+}
 
 @keyframes transparentRippleSpread {
   0% {
@@ -283,9 +331,11 @@ body {
     opacity: 0.95;
     border-width: 2.2px;
   }
+
   30% {
     opacity: 0.8;
   }
+
   100% {
     width: 140vmax;
     height: 140vmax;
@@ -318,20 +368,52 @@ body {
   animation: radialParticleOut 0.75s cubic-bezier(0.2, 0.8, 0.3, 1) 1.16s forwards;
 }
 
-.tp-1 { --angle: 0deg;   --dist: 44px; }
-.tp-2 { --angle: 45deg;  --dist: 48px; }
-.tp-3 { --angle: 90deg;  --dist: 45px; }
-.tp-4 { --angle: 135deg; --dist: 49px; }
-.tp-5 { --angle: 180deg; --dist: 44px; }
-.tp-6 { --angle: 225deg; --dist: 48px; }
-.tp-7 { --angle: 270deg; --dist: 45px; }
-.tp-8 { --angle: 315deg; --dist: 49px; }
+.tp-1 {
+  --angle: 0deg;
+  --dist: 44px;
+}
+
+.tp-2 {
+  --angle: 45deg;
+  --dist: 48px;
+}
+
+.tp-3 {
+  --angle: 90deg;
+  --dist: 45px;
+}
+
+.tp-4 {
+  --angle: 135deg;
+  --dist: 49px;
+}
+
+.tp-5 {
+  --angle: 180deg;
+  --dist: 44px;
+}
+
+.tp-6 {
+  --angle: 225deg;
+  --dist: 48px;
+}
+
+.tp-7 {
+  --angle: 270deg;
+  --dist: 45px;
+}
+
+.tp-8 {
+  --angle: 315deg;
+  --dist: 49px;
+}
 
 @keyframes radialParticleOut {
   0% {
     opacity: 0.9;
     transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--dist)) scale(0.3);
@@ -378,7 +460,9 @@ body {
 }
 
 @keyframes captionFade {
-  to { opacity: 0.9; }
+  to {
+    opacity: 0.9;
+  }
 }
 
 /* ==========================================================================
@@ -514,8 +598,17 @@ body {
 }
 
 @keyframes pulseStatus {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.45; transform: scale(0.85); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
 }
 
 /* ==========================================================================
@@ -707,8 +800,13 @@ body {
   color: var(--text-bright);
 }
 
-.strip-val.cyan { color: var(--water-cyan); }
-.strip-val.red { color: var(--risk-critical); }
+.strip-val.cyan {
+  color: var(--water-cyan);
+}
+
+.strip-val.red {
+  color: var(--risk-critical);
+}
 
 /* Primary CTA Button: SHOW ANALYSIS */
 .cta-button-container {
@@ -800,6 +898,16 @@ body {
   border-bottom: 1px solid rgba(56, 189, 248, 0.12);
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .section-title-group {
   display: flex;
   flex-direction: column;
@@ -888,11 +996,31 @@ body {
   box-shadow: 0 0 6px currentColor;
 }
 
-.legend-dot.crit { background-color: var(--risk-critical); color: var(--risk-critical); }
-.legend-dot.high { background-color: var(--risk-high); color: var(--risk-high); }
-.legend-dot.med  { background-color: var(--risk-medium); color: var(--risk-medium); }
-.legend-dot.low  { background-color: var(--risk-low); color: var(--risk-low); }
-.legend-dot.app  { background-color: var(--node-app); border: 1.5px solid var(--water-cyan); color: var(--water-cyan); }
+.legend-dot.crit {
+  background-color: var(--risk-critical);
+  color: var(--risk-critical);
+}
+
+.legend-dot.high {
+  background-color: var(--risk-high);
+  color: var(--risk-high);
+}
+
+.legend-dot.med {
+  background-color: var(--risk-medium);
+  color: var(--risk-medium);
+}
+
+.legend-dot.low {
+  background-color: var(--risk-low);
+  color: var(--risk-low);
+}
+
+.legend-dot.app {
+  background-color: var(--node-app);
+  border: 1.5px solid var(--water-cyan);
+  color: var(--water-cyan);
+}
 
 /* Graph & Info Side-by-Side */
 .graph-workspace {
@@ -912,7 +1040,8 @@ body {
   overflow: hidden;
 }
 
-svg#graph, svg#propagation-graph {
+svg#graph,
+svg#propagation-graph {
   width: 100%;
   height: 100%;
   min-height: 460px;
@@ -1241,7 +1370,8 @@ table.water-table .pkg-name-cell {
   text-transform: uppercase;
 }
 
-select#node-select, select#prop-node-select {
+select#node-select,
+select#prop-node-select {
   background: rgba(14, 18, 40, 0.85);
   color: var(--text-bright);
   font-family: 'JetBrains Mono', monospace;
@@ -1254,7 +1384,8 @@ select#node-select, select#prop-node-select {
   transition: border-color 0.2s ease;
 }
 
-select#node-select:focus, select#prop-node-select:focus {
+select#node-select:focus,
+select#prop-node-select:focus {
   border-color: var(--water-cyan);
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
 }
@@ -1344,8 +1475,17 @@ select#node-select:focus, select#prop-node-select:focus {
 }
 
 @keyframes auraExpand {
-  0% { r: 14px; opacity: 0.9; stroke-width: 2.5px; }
-  100% { r: 38px; opacity: 0; stroke-width: 0.5px; }
+  0% {
+    r: 14px;
+    opacity: 0.9;
+    stroke-width: 2.5px;
+  }
+
+  100% {
+    r: 38px;
+    opacity: 0;
+    stroke-width: 0.5px;
+  }
 }
 
 /* Node Impact Ripple Burst */
@@ -1357,8 +1497,17 @@ select#node-select:focus, select#prop-node-select:focus {
 }
 
 @keyframes nodeBurst {
-  0% { r: 12px; opacity: 1; stroke-width: 3px; }
-  100% { r: 32px; opacity: 0; stroke-width: 0.5px; }
+  0% {
+    r: 12px;
+    opacity: 1;
+    stroke-width: 3px;
+  }
+
+  100% {
+    r: 32px;
+    opacity: 0;
+    stroke-width: 0.5px;
+  }
 }
 
 /* Hop Sequence List in Info Panel */
@@ -1433,7 +1582,7 @@ select#node-select:focus, select#prop-node-select:focus {
   .graph-workspace {
     flex-direction: column;
   }
-  
+
   .graph-view-card {
     min-height: 420px;
   }
@@ -1447,7 +1596,7 @@ select#node-select:focus, select#prop-node-select:focus {
   .hero-title {
     font-size: 32px;
   }
-  
+
   .hero-section {
     padding: 36px 16px 20px;
   }
@@ -1462,7 +1611,8 @@ select#node-select:focus, select#prop-node-select:focus {
   }
 
   .nav-links {
-    display: none; /* Collapsed on small screens */
+    display: none;
+    /* Collapsed on small screens */
   }
 
   .simulator-controls-bar {

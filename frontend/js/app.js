@@ -95,14 +95,14 @@ async function handleUploadedFile(file) {
       method: 'POST',
       body: formData
     });
-    
+
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
       throw new Error(errData.error || 'Backend analysis failed');
     }
-    
+
     const data = await response.json();
-    
+
     // Update global state
     NODES = data.nodes;
     EDGES = data.edges;
@@ -126,6 +126,12 @@ async function handleUploadedFile(file) {
     if (typeof buildCombinedOverview === 'function') buildCombinedOverview();
     resetPropagation();
     
+    // Save state to sessionStorage for PRO tab
+    sessionStorage.setItem('dominode_nodes', JSON.stringify(NODES));
+    sessionStorage.setItem('dominode_edges', JSON.stringify(EDGES));
+    sessionStorage.setItem('dominode_osv', JSON.stringify(window.OSV_DETAILS));
+    sessionStorage.setItem('dominode_filename', file.name);
+
   } catch (err) {
     console.error(err);
     if (uploadTitle) uploadTitle.textContent = `Error analyzing ${file.name}`;
@@ -818,7 +824,7 @@ function buildThreatIntelDashboard() {
         if (vulns.some(v => v.severity === 'CRITICAL')) maxSev = "CRITICAL";
         else if (vulns.some(v => v.severity === 'HIGH')) maxSev = "HIGH";
         else if (vulns.some(v => v.severity === 'MEDIUM')) maxSev = "MEDIUM";
-        
+
         let pathHtml = '';
         path.forEach((node, i) => {
           if (i > 0) {
@@ -911,7 +917,7 @@ function generateAIFix(nodeId, resultsPanel) {
   setTimeout(() => {
     // Find smart fix for this node
     const smartFix = (window.SMART_FIXES || []).find(f => f.dep === nodeId);
-    
+
     if (!smartFix) {
       resultsPanel.innerHTML = `
         <div class="no-vulns-message">
@@ -930,7 +936,7 @@ function generateAIFix(nodeId, resultsPanel) {
     let impactHtml = '';
     if (smartFix.severityBreakdown.CRITICAL > 0) impactHtml += `<span class="trace-vuln-badge critical">${smartFix.severityBreakdown.CRITICAL} CRITICAL</span> `;
     if (smartFix.severityBreakdown.HIGH > 0) impactHtml += `<span class="trace-vuln-badge high">${smartFix.severityBreakdown.HIGH} HIGH</span> `;
-    
+
     // Build fix urgency badge
     let urgencyHtml = '';
     if (smartFix.fixLagDays !== null) {
@@ -940,7 +946,7 @@ function generateAIFix(nodeId, resultsPanel) {
       else urgencyHtml = `<span class="fix-lag-badge info">Recent fix (${days} days ago)</span>`;
     }
 
-    const actionText = smartFix.fixVersion 
+    const actionText = smartFix.fixVersion
       ? `Upgrade <strong>${node.name}</strong> to version <strong>${smartFix.fixVersion}</strong>`
       : `Update <strong>${node.name}</strong> to latest stable version`;
 
@@ -997,7 +1003,7 @@ function buildCombinedOverview() {
   const toolbox = document.getElementById("combined-overview-toolbox");
   const toggleBtn = document.getElementById("combined-overview-toggle");
   const content = document.getElementById("combined-overview-content");
-  
+
   if (toggleBtn && toolbox && !toggleBtn.hasListener) {
     toggleBtn.addEventListener("click", () => {
       toolbox.classList.toggle("closed");
@@ -1021,7 +1027,7 @@ function buildCombinedOverview() {
   // Get Top 3 Threats
   const allNodes = NODES.filter(n => n.type === 'package').sort((a, b) => METRICS[b.id].trueRisk - METRICS[a.id].trueRisk);
   const topThreats = allNodes.slice(0, 3);
-  
+
   let threatsHtml = '';
   topThreats.forEach(n => {
     const risk = METRICS[n.id].trueRisk;
@@ -1074,7 +1080,7 @@ function buildCombinedOverview() {
     
     ${topFixHtml}
   `;
-  
+
   // Auto-open toolbox on load if there are threats
   if (maxRisk > 0 && toolbox.classList.contains("closed")) {
     toolbox.classList.remove("closed");

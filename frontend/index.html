@@ -89,6 +89,12 @@
         <a class="nav-item" href="#section-scoreboard">02 Scoreboard</a>
         <a class="nav-item" href="#section-intel">03 Intel</a>
         <a class="nav-item" href="#section-propagation">04 Simulator</a>
+        <a class="nav-item nav-pro" href="#section-pro">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          05 Pro
+        </a>
       </nav>
 
       <div class="nav-status-badge">
@@ -372,6 +378,224 @@
         </section>
 
 
+        <!-- ===================================================================
+             SECTION 05: PRO — PREMIUM VULNERABILITY INTELLIGENCE
+             =================================================================== -->
+        <section id="section-pro" class="analysis-section pro-section">
+          <div class="section-header-row">
+            <div class="section-title-group">
+              <span class="section-num" style="color: #fbbf24;">SECTION 05 — PRO</span>
+              <h2 class="section-title">Premium Vulnerability Intelligence</h2>
+              <p class="section-desc">
+                Deep-dive OSV error analysis, AI-suggested remediation logic, and certified comprehensive reporting for your manifest.
+              </p>
+            </div>
+          </div>
+
+          <!-- 4-Grid Layout for PRO Features -->
+          <div class="pro-grid">
+            
+            <!-- PANEL 1: OSV Error Details ("What is the error") -->
+            <div class="pro-panel glass-panel" style="border-top-color: #ef4444;">
+              <div class="pro-panel-header">
+                <div class="pro-panel-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                  <span>OSV Intelligence: What is the Error?</span>
+                </div>
+              </div>
+              <div class="pro-panel-body">
+                <p class="pro-desc" style="margin-bottom: 12px;">Review exact vulnerability details mapped from global OSV databases (NVD, GitHub Advisory, PyPI Advisory, npm Audit, RustSec).</p>
+                <select id="osv-node-select" class="toolbox-select" style="width: 100%; padding: 10px; background: rgba(9,11,24,0.6); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 6px; margin-bottom: 16px;">
+                  <option value="">Select a vulnerable dependency...</option>
+                </select>
+                
+                <div id="osv-details-container" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; min-height: 200px;">
+                  <div class="intel-placeholder">Select a dependency to view precise OSV error details.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL 2: AI Remediation Suggestions ("How to fix it") -->
+            <div class="pro-panel glass-panel" style="border-top-color: #f59e0b;">
+              <div class="pro-panel-header">
+                <div class="pro-panel-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                    <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                    <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                  </svg>
+                  <span>AI Remediation: How to Fix It</span>
+                </div>
+              </div>
+              <div class="pro-panel-body">
+                <p class="pro-desc" style="margin-bottom: 12px;">Generate a step-by-step logical remediation plan. No automatic changes are made — you receive the logic and the reasoning.</p>
+                
+                <div class="ai-fix-controls" style="display: flex; gap: 8px; margin-bottom: 16px;">
+                  <button id="btn-suggest-single" class="btn-pro-action" style="flex: 1; padding: 10px;">
+                    Suggest Fix for Selected
+                  </button>
+                  <button id="btn-suggest-full" class="btn-pro-action" style="flex: 2; padding: 10px;">
+                    Plan Full Manifest Remediation
+                  </button>
+                </div>
+                
+                <div id="ai-logic-results" class="ai-results-container" style="flex: 1; min-height: 300px; max-height: 500px;">
+                  <div class="intel-placeholder">Awaiting command to generate logical fix strategy.</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- PANEL 3: Complete Analysis PDF -->
+            <div class="pro-panel glass-panel" style="border-top-color: #10b981;">
+              <div class="pro-panel-header">
+                <div class="pro-panel-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                  <span>Complete Analysis PDF</span>
+                </div>
+              </div>
+              <div class="pro-panel-body" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 16px;">
+                <p class="pro-desc">Export enterprise-grade security audit documentation covering full dependency trees, vulnerability telemetry, and prioritized remediation actions.</p>
+                
+                <div style="display: flex; gap: 12px; width: 100%; max-width: 480px;">
+                  <button id="btn-generate-pdf" class="btn-pro-action" style="flex: 1; background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.5); color: #34d399;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Technical Audit Report
+                  </button>
+                  <button id="btn-generate-pdf-simple" class="btn-pro-action" style="flex: 1; background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5); color: #a78bfa;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Executive Summary Report
+                  </button>
+                </div>
+                <div id="pdf-status" style="font-size: 12px; color: #94a3b8; display: none;">Generating PDF, please wait...</div>
+              </div>
+            </div>
+            
+            <!-- PANEL 4: Security Certification -->
+            <div class="pro-panel glass-panel cert-panel" style="border-top-color: #3b82f6;">
+              <div class="pro-panel-header">
+                <div class="pro-panel-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                    <circle cx="12" cy="8" r="7"></circle>
+                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                  </svg>
+                  <span>Security Certification</span>
+                </div>
+                <button id="btn-download-cert" class="btn-cert-print">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Download Certificate
+                </button>
+              </div>
+              <div class="pro-panel-body">
+                <div id="cert-container" class="certificate-wrapper locked">
+                  <div class="cert-border-inner"></div>
+                  <div class="cert-watermark">DOMINODE</div>
+                  
+                  <div class="cert-header-formal">
+                    <div class="cert-header-left">
+                      <div class="brand-name" style="font-size: 14px; color: #fff; letter-spacing: 0.2em;">DOMINODE <span style="color: #fbbf24;">SECURITY</span></div>
+                      <div class="cert-id">CERT ID: <span id="cert-id-val">DN-XXXXXXXX</span></div>
+                    </div>
+                    <div class="cert-header-right">
+                      <div class="cert-date-formal">ISSUED: <span id="cert-date-val">--/--/----</span></div>
+                    </div>
+                  </div>
+                  
+                  <div class="cert-title-formal">
+                    <h2>ATTESTATION OF ANALYSIS</h2>
+                    <div class="cert-subtitle">DEPENDENCY RISK &amp; VULNERABILITY AUDIT</div>
+                  </div>
+                  
+                  <div class="cert-body-formal">
+                    <p class="cert-declaration">
+                      This document formally certifies that the software manifest designated as <strong id="cert-file-name-formal" class="cert-highlight">---</strong> has undergone comprehensive automated vulnerability analysis using the DomiNode Threat Intelligence Engine. The analysis evaluated the full dependency graph for known Common Vulnerabilities and Exposures (CVEs) and calculated the true cascading blast radius of all components.
+                    </p>
+                    
+                    <div class="cert-metrics-grid">
+                      <div class="cert-metric-cell">
+                        <div class="cert-metric-label">INTELLIGENCE SOURCES</div>
+                        <div id="cert-ecosystem-formal" class="cert-metric-value" style="font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">---</div>
+                      </div>
+                      <div class="cert-metric-cell">
+                        <div class="cert-metric-label">TOTAL NODES</div>
+                        <div id="cert-total-deps" class="cert-metric-value">---</div>
+                      </div>
+                      <div class="cert-metric-cell">
+                        <div class="cert-metric-label">VULNERABILITY SCORE</div>
+                        <div id="cert-vuln-score-formal" class="cert-metric-value">---</div>
+                      </div>
+                      <div class="cert-metric-cell">
+                        <div class="cert-metric-label">CRITICAL VECTORS</div>
+                        <div id="cert-critical-formal" class="cert-metric-value">---</div>
+                      </div>
+                    </div>
+                    
+                    <div class="cert-status-banner">
+                      <div class="status-label">AUDIT STATUS:</div>
+                      <div id="cert-status-formal" class="status-value status-pending">PENDING ANALYSIS</div>
+                    </div>
+                  </div>
+                  
+                  <div class="cert-footer-formal">
+                    <div class="cert-signature-area">
+                      <div class="cert-sig-line"></div>
+                      <div class="cert-sig-name">SYSTEM OVERSEER</div>
+                      <div class="cert-sig-title">Automated Analysis Protocol</div>
+                    </div>
+                    
+                    <div class="cert-seal-formal">
+                      <div class="seal-outer">
+                        <div class="seal-inner">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            <path d="M9 12l2 2 4-4"></path>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="seal-text">VERIFIED &amp;<br>SECURED</div>
+                    </div>
+                    
+                    <div class="cert-qr-placeholder">
+                      <svg width="48" height="48" viewBox="0 0 48 48">
+                         <rect width="48" height="48" fill="#fff"/>
+                         <path d="M4 4h12v12H4zm2 2v8h8V6zM32 4h12v12H32zm2 2v8h8V6zM4 32h12v12H4zm2 2v8h8v-8zm16-30h8v4h-8zm0 8h4v4h-4zm4 4h4v4h-4zm-8 4h4v4h-4zm8 0h8v4h-8zm-16 8h4v4h-4zm8 0h4v4h-4zm8 0h4v4h-4zm-16 8h4v4h-4zm8 0h8v4h-8z" fill="#0f172a"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div> <!-- /pro-grid -->
+
+        </section>
+
       </div>
     </main>
 
@@ -387,31 +611,7 @@
          FLOATING TOOLBOXES
          ======================================================================= -->
     
-    <!-- Smart Fix Toolbox (Bottom Left) -->
-    <div id="smart-fix-toolbox" class="floating-toolbox bottom-left closed">
-      <div class="toolbox-header" id="smart-fix-toggle">
-        <div class="toolbox-title">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2">
-            <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"></path>
-          </svg>
-          Smart Fix Actions
-        </div>
-        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="18 15 12 9 6 15"></polyline>
-        </svg>
-      </div>
-      <div class="toolbox-body">
-        <div class="toolbox-controls">
-          <select id="fix-node-select" class="toolbox-select">
-            <option value="">Choose a direct dependency…</option>
-          </select>
-          <button id="btn-generate-fix" class="toolbox-btn">Generate AI Fix</button>
-        </div>
-        <div id="ai-fix-results" class="toolbox-results">
-          <div class="intel-placeholder" style="padding: 10px 0;">Select a dependency to analyze</div>
-        </div>
-      </div>
-    </div>
+    <!-- Floating Toolbox for Overview (Smart Fix removed) -->
 
     <!-- Combined Overview Toolbox (Bottom Right) -->
     <div id="combined-overview-toolbox" class="floating-toolbox bottom-right closed">
@@ -438,10 +638,13 @@
   </div>
 
   <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="js/water.js"></script>
   <script src="js/data.js"></script>
   <script src="js/shared.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/pro.js"></script>
   <script src="js/splash.js"></script>
 
 </body>

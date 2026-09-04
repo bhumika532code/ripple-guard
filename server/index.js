@@ -707,40 +707,41 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
       }
     });
 
-    // ========== FETCH FULL OSV DETAILS FOR ENRICHMENT ==========
-    // Get timestamps, fix versions, and severity from individual OSV records
+    // Fetch full OSV records for enrichment (in concurrent batches of 25)
     const vulnIdsToFetch = new Set();
     for (const [nodeId, vulns] of Object.entries(osvDetails)) {
       for (const v of vulns) {
-        if (v.source === 'OSV' && v.id && v.id.startsWith('GHSA') || v.id?.startsWith('PYSEC') || v.id?.startsWith('RUSTSEC') || v.id?.startsWith('GO-')) {
+        if (v.source === 'OSV' && v.id) {
           vulnIdsToFetch.add(v.id);
         }
       }
     }
 
-    // Fetch up to 20 full OSV records for enrichment (to avoid rate limits)
-    const idsToFetch = [...vulnIdsToFetch].slice(0, 20);
+    const idsToFetch = [...vulnIdsToFetch];
     const fullOsvDetails = {};
 
     if (idsToFetch.length > 0) {
-      console.log(`Fetching full details for ${idsToFetch.length} OSV vulnerabilities...`);
-      const detailPromises = idsToFetch.map((id, i) =>
-        new Promise(resolve => setTimeout(async () => {
-          try {
-            const resp = await axios.get(`https://api.osv.dev/v1/vulns/${id}`, { timeout: 8000 });
-            resolve({ id, data: resp.data });
-          } catch {
-            resolve({ id, data: null });
-          }
-        }, i * 100))
-      );
-      const detailResults = await Promise.all(detailPromises);
-      for (const { id, data } of detailResults) {
-        if (data) fullOsvDetails[id] = data;
+      console.log(`Fetching full OSV details for all ${idsToFetch.length} vulnerabilities across packages...`);
+      const BATCH_SIZE = 25;
+      for (let i = 0; i < idsToFetch.length; i += BATCH_SIZE) {
+        const batch = idsToFetch.slice(i, i + BATCH_SIZE);
+        const batchResults = await Promise.all(
+          batch.map(async (id) => {
+            try {
+              const resp = await axios.get(`https://api.osv.dev/v1/vulns/${id}`, { timeout: 8000 });
+              return { id, data: resp.data };
+            } catch {
+              return { id, data: null };
+            }
+          })
+        );
+        for (const { id, data } of batchResults) {
+          if (data) fullOsvDetails[id] = data;
+        }
       }
     }
 
-    // Enrich merged vulns with full OSV data (timestamps, fix versions, severity)
+    // Enrich merged vulns with full OSV data (timestamps, fix versions, severity, descriptions)
     for (const [nodeId, vulns] of Object.entries(osvDetails)) {
       for (let i = 0; i < vulns.length; i++) {
         const v = vulns[i];
@@ -751,22 +752,31 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
           v.modified = full.modified || null;
 
           // Add fix version info
-          if (full.affected && full.affected[0]) {
-            const aff = full.affected[0];
-            v.affectedPackage = aff.package?.name || nodeId;
-            v.affectedVersions = aff.versions || [];
+          if (full.affected && full.affected.length > 0) {
+            const aff = full.affected.find(a => a.package && a.package.name === nodeId) || full.affected[0];
+            if (aff) {
+              v.affectedPackage = aff.package?.name || nodeId;
+              v.affectedVersions = aff.versions || [];
 
-            // Extract fix events from ranges
-            if (aff.ranges) {
-              for (const range of aff.ranges) {
-                if (range.events) {
-                  const fixEvent = range.events.find(e => e.fixed);
-                  const introEvent = range.events.find(e => e.introduced);
-                  if (fixEvent) v.fixVersion = fixEvent.fixed;
-                  if (introEvent) v.introducedVersion = introEvent.introduced;
+              // Extract fix events from ranges
+              if (aff.ranges) {
+                for (const range of aff.ranges) {
+                  if (range.events) {
+                    const fixEvent = range.events.find(e => e.fixed);
+                    const introEvent = range.events.find(e => e.introduced);
+                    if (fixEvent && !v.fixVersion) v.fixVersion = fixEvent.fixed;
+                    if (introEvent && !v.introducedVersion) v.introducedVersion = introEvent.introduced;
+                  }
                 }
               }
             }
+          }
+
+          // Add database_specific
+          if (full.database_specific) {
+            v.database_specific = full.database_specific;
+          } else if (aff && aff.database_specific) {
+            v.database_specific = aff.database_specific;
           }
 
           // Add severity from OSV
@@ -775,9 +785,10 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
             v.osvSeverityScore = full.severity[0].score;
           }
 
-          // Enrich summary/details
-          if (!v.summary && full.summary) v.summary = full.summary;
-          if (full.details && !v.details) v.details = full.details;
+          // Enrich summary / details / description
+          if (full.summary) v.summary = full.summary;
+          if (full.details) v.details = full.details;
+          v.description = v.summary || v.details || full.summary || full.details || v.description;
           if (full.aliases) v.aliases = [...new Set([...(v.aliases || []), ...full.aliases])];
         }
 
@@ -789,11 +800,26 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
         }
 
         // Normalize severity for all sources
-        if (!v.severity && v.cvssScore) {
+        if (v.cvssScore) {
           v.severity = v.cvssScore >= 9 ? 'CRITICAL' : v.cvssScore >= 7 ? 'HIGH' : v.cvssScore >= 4 ? 'MEDIUM' : 'LOW';
         }
+        // Try to derive from database_specific severity (OSV / GitHub Advisory)
+        if ((!v.severity || v.severity === 'UNKNOWN') && v.database_specific && v.database_specific.severity) {
+          v.severity = v.database_specific.severity.toUpperCase();
+        }
+        // Try to derive severity from OSV CVSS vector score
+        if ((!v.severity || v.severity === 'UNKNOWN') && v.osvSeverityScore) {
+          const baseScoreMatch = v.osvSeverityScore.match(/(\d+\.?\d*)\s*$/);
+          if (baseScoreMatch) {
+            const score = parseFloat(baseScoreMatch[1]);
+            v.cvssScore = score;
+            v.severity = score >= 9 ? 'CRITICAL' : score >= 7 ? 'HIGH' : score >= 4 ? 'MEDIUM' : 'LOW';
+          } else if (v.osvSeverityScore.includes('C:H') || v.osvSeverityScore.includes('A:H') || v.osvSeverityScore.includes('I:H')) {
+            v.severity = 'HIGH';
+          }
+        }
         if (!v.severity) {
-          v.severity = 'UNKNOWN';
+          v.severity = 'MEDIUM';
         }
       }
     }

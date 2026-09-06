@@ -975,6 +975,33 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
     console.log(`  Direct vulns: ${directVulnCount}, Transitive vulns: ${transitiveVulnCount}`);
     console.log(`  Smart fixes generated: ${smartFixes.length}`);
 
+    // ========== GENERATE FIXED MANIFEST ==========
+    let fixedManifest = null;
+    if (ecosystem === 'npm' && smartFixes.length > 0) {
+      try {
+        const parsedJson = JSON.parse(fileContent);
+        let changed = false;
+        
+        for (const fix of smartFixes) {
+          if (fix.fixVersion) {
+            if (parsedJson.dependencies && parsedJson.dependencies[fix.name]) {
+              parsedJson.dependencies[fix.name] = `^${fix.fixVersion}`;
+              changed = true;
+            } else if (parsedJson.devDependencies && parsedJson.devDependencies[fix.name]) {
+              parsedJson.devDependencies[fix.name] = `^${fix.fixVersion}`;
+              changed = true;
+            }
+          }
+        }
+        
+        if (changed) {
+          fixedManifest = JSON.stringify(parsedJson, null, 2);
+        }
+      } catch (err) {
+        console.error("Failed to parse or patch package.json:", err);
+      }
+    }
+
     // Clean up temp file
     fs.unlinkSync(req.file.path);
 
@@ -991,6 +1018,7 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
       directVsTransitive,
       vulnTraces,
       smartFixes,
+      fixedManifest,
     });
 
   } catch (error) {

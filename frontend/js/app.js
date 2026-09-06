@@ -111,6 +111,7 @@ async function handleUploadedFile(file) {
     window.DIRECT_VS_TRANSITIVE = data.directVsTransitive || null;
     window.VULN_TRACES = data.vulnTraces || null;
     window.SMART_FIXES = data.smartFixes || null;
+    window.FIXED_MANIFEST = data.fixedManifest || null;
 
     if (uploadTitle) uploadTitle.textContent = `Project Loaded: ${file.name}`;
     const sourcesUsed = (data.sources || ['OSV']).join(' + ');

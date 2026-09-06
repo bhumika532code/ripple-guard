@@ -167,6 +167,29 @@
     const btnSingle = document.getElementById('btn-suggest-single');
     const btnFull = document.getElementById('btn-suggest-full');
     const resultsContainer = document.getElementById('ai-logic-results');
+    
+    const instantFixContainer = document.getElementById('instant-fix-container');
+    const btnInstantDownload = document.getElementById('btn-instant-download');
+    
+    if (instantFixContainer) {
+      instantFixContainer.style.display = window.FIXED_MANIFEST ? 'block' : 'none';
+    }
+    
+    if (btnInstantDownload) {
+      const newBtn = btnInstantDownload.cloneNode(true);
+      btnInstantDownload.parentNode.replaceChild(newBtn, btnInstantDownload);
+      newBtn.addEventListener('click', () => {
+        if (!window.FIXED_MANIFEST) return;
+        const blob = new Blob([window.FIXED_MANIFEST], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const origName = sessionStorage.getItem('dominode_filename') || 'package.json';
+        a.href = url;
+        a.download = origName;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
 
     if (!resultsContainer) return;
 
@@ -236,6 +259,38 @@
           lines.push({ text: ``, cls: '' });
           lines.push({ text: `📊 BLAST RADIUS: ${m.affectedCount} nodes affected, ${m.affectedAppsCount} applications at risk`, cls: '' });
           lines.push({ text: `   True Risk Score: ${m.trueRisk}/100`, cls: m.trueRisk >= 70 ? 'ai-error' : m.trueRisk >= 52 ? 'ai-warning' : '' });
+        }
+        
+        if (window.FIXED_MANIFEST) {
+          lines.push({ text: ``, cls: '' });
+          lines.push({ text: `=====================================================`, cls: 'ai-system' });
+          lines.push({ text: `AUTO-FIX MANIFEST GENERATED SUCCESSFULLY`, cls: 'ai-success' });
+          lines.push({ 
+            isHtml: true, 
+            text: `<button id="btn-download-fixed-manifest-single" class="btn-primary" style="margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                       <polyline points="7 10 12 15 17 10"></polyline>
+                       <line x1="12" y1="15" x2="12" y2="3"></line>
+                     </svg>
+                     Download Patched Manifest
+                   </button>`,
+            onRender: (el) => {
+              const btn = el.querySelector('#btn-download-fixed-manifest-single');
+              if (btn) {
+                btn.addEventListener('click', () => {
+                  const blob = new Blob([window.FIXED_MANIFEST], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  const origName = sessionStorage.getItem('dominode_filename') || 'package.json';
+                  a.href = url;
+                  a.download = origName;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                });
+              }
+            }
+          });
         }
       }
 
@@ -310,6 +365,38 @@
         lines.push({ text: `Total Vulnerabilities: ${totalVulns}`, cls: '' });
         lines.push({ text: `Auto-fixable: ${fixable} | Manual Review: ${sorted.length - fixable}`, cls: '' });
         lines.push({ text: `Recommendation: Start with highest True Risk scores first.`, cls: 'ai-success' });
+        
+        if (window.FIXED_MANIFEST) {
+          lines.push({ text: ``, cls: '' });
+          lines.push({ text: `=====================================================`, cls: 'ai-system' });
+          lines.push({ text: `AUTO-FIX MANIFEST GENERATED SUCCESSFULLY`, cls: 'ai-success' });
+          lines.push({ 
+            isHtml: true, 
+            text: `<button id="btn-download-fixed-manifest-full" class="btn-primary" style="margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                       <polyline points="7 10 12 15 17 10"></polyline>
+                       <line x1="12" y1="15" x2="12" y2="3"></line>
+                     </svg>
+                     Download Patched Manifest
+                   </button>`,
+            onRender: (el) => {
+              const btn = el.querySelector('#btn-download-fixed-manifest-full');
+              if (btn) {
+                btn.addEventListener('click', () => {
+                  const blob = new Blob([window.FIXED_MANIFEST], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  const origName = sessionStorage.getItem('dominode_filename') || 'package.json';
+                  a.href = url;
+                  a.download = origName;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                });
+              }
+            }
+          });
+        }
       }
 
       typewriterRender(container, lines);
@@ -322,8 +409,12 @@
     lines.forEach((line, i) => {
       setTimeout(() => {
         const div = document.createElement('div');
-        div.className = `ai-typing-line ${line.cls}`;
-        div.textContent = line.text;
+        if (line.isHtml) {
+          div.innerHTML = line.text;
+        } else {
+          div.className = `ai-typing-line ${line.cls}`;
+          div.textContent = line.text;
+        }
         div.style.opacity = '0';
         div.style.transform = 'translateY(4px)';
         div.style.transition = 'opacity 0.2s, transform 0.2s';
@@ -332,6 +423,9 @@
           div.style.opacity = '1';
           div.style.transform = 'translateY(0)';
         });
+        if (line.isHtml && typeof line.onRender === 'function') {
+          line.onRender(div);
+        }
         container.scrollTop = container.scrollHeight;
       }, i * 50);
     });
@@ -891,6 +985,7 @@
   window.refreshProSection = function () {
     initOSVPanel();
     initCertification();
+    initAIRemediationPanel();
   };
 
   // Hook into the existing app.js data loading flow

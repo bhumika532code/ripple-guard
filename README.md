@@ -1,634 +1,543 @@
 # DomiNode
 
-<p align="center">
-  <strong>See the ripple. Understand the risk. Fix what matters.</strong>
-</p>
+> **See the ripple. Understand the risk. Fix what matters.**
 
-<p align="center">
-  AI-powered software supply-chain security through dependency graphs, threat intelligence, and propagation analysis.
-</p>
+DomiNode is an AI-powered software supply-chain security platform that maps dependencies, detects vulnerabilities, analyzes their propagation, and helps developers understand what actually needs to be fixed.
 
-<p align="center">
+Traditional vulnerability scanners tell you **what is vulnerable**.
 
-![Status](https://img.shields.io/badge/status-in%20development-orange)
-![Security](https://img.shields.io/badge/focus-supply%20chain%20security-blue)
-![Analysis](https://img.shields.io/badge/analysis-dependency%20graph-purple)
-![AI](https://img.shields.io/badge/AI-powered-black)
-
-</p>
+DomiNode shows you **where it is, what depends on it, how the risk can spread, and what to fix first**.
 
 ---
 
-## 🚨 The Problem
+## Why DomiNode?
 
-Modern applications aren't built from scratch.
+Modern applications are built on thousands of open-source dependencies.
 
-They are built on top of thousands of open-source packages — and those packages depend on other packages.
-
-A single vulnerable dependency can create a much larger problem:
+A typical application may look simple:
 
 ```text
-                YOUR APPLICATION
-                       │
-              ┌────────┴────────┐
-              ▼                 ▼
-         Dependency A      Dependency B
-              │                 │
-              ▼                 ▼
-         Dependency C      Dependency D
-              │
-              ▼
-       ⚠ Vulnerable Package
-              │
-              ▼
-        Ripple Effect
+Your Application
+      │
+      ├── Package A
+      ├── Package B
+      └── Package C
 ```
 
-The deeper the dependency, the harder it is to see.
+But those packages have their own dependencies:
 
-Traditional scanners are good at answering:
+```text
+Your Application
+      │
+      ├── Package A
+      │      └── Package D
+      │             └── Package F
+      │
+      ├── Package B
+      │      └── Package E
+      │             └── Package F
+      │
+      └── Package C
+```
 
-> **"Which packages are vulnerable?"**
+Now imagine `Package F` contains a vulnerability.
 
-But developers also need to know:
+The problem isn't simply:
 
-> **"How did it get here?"**
-> **"What can it affect?"**
-> **"How far can it propagate?"**
-> **"What should I fix first?"**
+```text
+Package F → Vulnerable
+```
 
-That's where **DomiNode** comes in.
+The real question is:
+
+```text
+How did it reach my application?
+
+Who depends on it?
+
+How many components can it affect?
+
+How far can the vulnerability propagate?
+
+What is the smallest effective fix?
+```
+
+**DomiNode is built to answer those questions.**
 
 ---
 
-# 🧠 What is DomiNode?
+# What DomiNode Does
 
-**DomiNode** is an advanced, AI-powered dependency graph visualizer and threat intelligence platform.
-
-Instead of presenting vulnerabilities as a flat list, DomiNode builds a map of your software supply chain and analyzes vulnerabilities **in context**.
-
-It combines:
-
-* 🔗 Dependency graph resolution
-* 🌐 Transitive dependency discovery
-* 🛡️ Multi-source vulnerability intelligence
-* 🎯 Context-aware risk scoring
-* 🌊 Vulnerability propagation simulation
-* 🧠 AI-assisted remediation
-* 📊 Security analytics
-* 📑 Detailed security reports
-
-> **DomiNode doesn't just tell you that a vulnerability exists. It shows you the ripple it can create.**
-
----
-
-# ⚡ How It Works
-
-### 01 — Upload
-
-Upload your project or dependency files.
-
-DomiNode detects the ecosystem and extracts the project's direct dependencies.
+DomiNode turns your dependency tree into a security graph.
 
 ```text
 Project
-  │
-  ├── package.json
-  ├── requirements.txt
-  ├── pom.xml
-  ├── go.mod
-  └── ...
+   │
+   ▼
+Dependency Extraction
+   │
+   ▼
+Dependency Graph
+   │
+   ▼
+Vulnerability Intelligence
+   │
+   ▼
+True Risk Analysis
+   │
+   ▼
+Propagation Analysis
+   │
+   ▼
+Remediation
 ```
+
+Instead of treating every vulnerability as an isolated package-level problem, DomiNode analyzes the vulnerability in the context of the entire dependency graph.
 
 ---
 
-### 02 — Build the Dependency Graph
+# Core Features
 
-DomiNode resolves direct and transitive dependencies to construct a dependency graph.
+## 1. Dependency Graph
+
+DomiNode discovers both direct and transitive dependencies and represents them as a graph.
+
+```text
+                Application
+                /         \
+               /           \
+        Dependency A    Dependency B
+             │               │
+             ▼               ▼
+        Dependency C    Dependency D
+             │
+             ▼
+       Vulnerable Package
+```
+
+This makes hidden dependency relationships visible.
+
+---
+
+## 2. Dynamic Dependency Resolution
+
+DomiNode doesn't stop at the dependencies explicitly listed in your project.
+
+It resolves the packages behind those dependencies using public package registries.
+
+The resulting dependency structure is represented as a Directed Acyclic Graph (DAG).
+
+This allows DomiNode to identify vulnerabilities buried deep inside the dependency tree.
+
+---
+
+## 3. Multi-Source Vulnerability Intelligence
+
+DomiNode combines vulnerability information from multiple sources:
+
+* OSV
+* GitHub Advisory Database
+* NVD
+* Sonatype OSS Index
+
+The results are merged and deduplicated using vulnerability identifiers and aliases.
+
+This helps reduce blind spots that can occur when relying on a single vulnerability database.
+
+---
+
+# 4. True Risk Score
+
+A vulnerability's published severity doesn't always describe its actual impact on your application.
+
+DomiNode combines vulnerability severity with the package's position in the dependency graph.
+
+Conceptually:
+
+```text
+True Risk
+    =
+Vulnerability Severity
+    +
+Graph Connectivity
+    +
+Potential Blast Radius
+```
+
+For example:
+
+```text
+Package A
+Severity: Critical
+Dependents: 1
+
+Package B
+Severity: Medium
+Dependents: 40
+```
+
+A traditional scanner may prioritize Package A purely based on severity.
+
+DomiNode also considers **how deeply connected the package is** and how many other components rely on it.
+
+The result is a more contextual view of risk.
+
+---
+
+# 5. Ripple Effect Analysis
+
+This is one of DomiNode's central ideas.
+
+When a vulnerable package is compromised, DomiNode can simulate how the impact travels through the dependency graph.
+
+```text
+           Vulnerable Package
+                    │
+                    ▼
+               Package A
+                    │
+              ┌─────┴─────┐
+              ▼           ▼
+          Package B    Package C
+              │           │
+              ▼           ▼
+          Package D    Package E
+               \         /
+                \       /
+                 ▼     ▼
+                Application
+```
+
+DomiNode uses graph traversal and taint analysis to identify and visualize these propagation paths.
+
+Instead of reading a static vulnerability list, developers can **follow the path of the risk**.
+
+---
+
+# 6. Vulnerability Severity
+
+DomiNode provides a clear breakdown of vulnerabilities by severity.
+
+```text
+Critical
+High
+Medium
+Low
+```
+
+This makes it easier to understand the overall security posture of a project and prioritize issues.
+
+---
+
+# 7. Attack Surface Analysis
+
+DomiNode distinguishes between:
+
+```text
+Direct Dependencies
+        │
+        └── Dependencies explicitly used by your project
+
+Transitive Dependencies
+        │
+        └── Dependencies pulled in by other dependencies
+```
+
+This provides visibility into how much of your application's attack surface comes from dependencies you directly chose versus dependencies introduced indirectly.
+
+---
+
+# 8. Dependency Trace Paths
+
+DomiNode provides the dependency path leading from a vulnerable package toward the application.
+
+Example:
 
 ```text
 Application
-     │
-     ├──────────────┐
-     ▼              ▼
-   React          Express
-     │              │
-     ▼              ▼
-  Package A       Package B
-                      │
-                      ▼
-               ⚠ Vulnerable
+    ↓
+Express
+    ↓
+Package X
+    ↓
+Package Y
+    ↓
+Vulnerable Package
 ```
 
-The result is a representation of the hidden structure behind your application.
+This gives developers the context needed to understand where the vulnerability originated.
 
 ---
 
-### 03 — Find Vulnerabilities
+# AI-Powered Remediation
 
-DomiNode queries multiple vulnerability intelligence sources.
+Finding vulnerabilities is only part of the problem.
 
-Currently referenced sources include:
+The harder question is:
 
-* **OSV**
-* **GitHub Advisory Database**
-* **NVD**
-* **Sonatype OSS Index**
+> **What should I actually change?**
 
-The results are merged and deduplicated to improve coverage.
+DomiNode's planned AI remediation capabilities analyze the dependency tree to identify the minimum direct dependency upgrades that can resolve multiple transitive vulnerabilities.
 
----
-
-### 04 — Calculate True Risk
-
-A vulnerability's published severity doesn't always tell the complete story.
-
-DomiNode considers the vulnerability **and where the affected package sits in the dependency graph**.
-
-```text
-              Vulnerability Severity
-                         +
-                    Blast Radius
-                         ↓
-                  TRUE RISK SCORE
-```
-
-A moderately severe vulnerability in a highly connected package may represent greater systemic risk than a critical vulnerability affecting an isolated dependency.
-
----
-
-### 05 — Simulate the Ripple
-
-DomiNode uses graph traversal and taint analysis to visualize how a compromised dependency can propagate through the dependency tree.
-
-```text
-      ⚠ COMPROMISED
-           │
-           ▼
-       Package A
-           │
-           ▼
-       Package B
-           │
-           ▼
-       Package C
-           │
-           ▼
-    YOUR APPLICATION
-```
-
-Instead of reading a static report, you can **see the propagation path**.
-
----
-
-# 🎯 Core Features
-
-## 🔗 Dependency Graph
-
-Visualize your complete dependency structure instead of looking at isolated package names.
-
-**Direct dependencies → Transitive dependencies → Application**
-
----
-
-## 🌊 Ripple / Propagation Analysis
-
-Trace how a compromised dependency can move through the software supply chain.
-
-DomiNode performs taint analysis using graph traversal and highlights propagation paths hop-by-hop.
-
----
-
-## 🎯 True Risk Score
-
-Traditional severity:
-
-```text
-CVSS = 6.5
-```
-
-DomiNode asks:
-
-```text
-How connected is this package?
-How many packages depend on it?
-How close is it to the application?
-What is its potential blast radius?
-```
-
-The result is a risk assessment based on the vulnerability **and its position within the dependency graph**.
-
----
-
-## 👀 Hidden Risk
-
-DomiNode identifies situations where the systemic risk of a dependency may be significantly greater than its reported vulnerability severity.
-
-The objective is to surface risks that a simple vulnerability list can hide.
-
----
-
-## 🛡️ Multi-Source Threat Intelligence
-
-DomiNode brings together information from multiple vulnerability databases.
-
-```text
-             ┌──────────────┐
-             │     OSV      │
-             └──────┬───────┘
-                    │
- ┌──────────────────┼──────────────────┐
- │                  │                  │
- ▼                  ▼                  ▼
-GHSA               NVD            OSS Index
- │                  │                  │
- └──────────────────┼──────────────────┘
-                    ▼
-          DomiNode Intelligence
-                    │
-                    ▼
-          Deduplicated Findings
-```
-
----
-
-# 🧠 AI Remediation
-
-Finding vulnerabilities is only half the job.
-
-DomiNode's planned Pro functionality includes **Dependency Tree-Based Remediation (DTR)**.
-
-Instead of telling developers to manually update a deeply nested package, DomiNode traces the dependency graph backwards to identify the direct dependency that can resolve the issue.
-
-### Example
+Example:
 
 ```text
 Application
      │
      ▼
-Express 4.16
+Express
      │
      ▼
 Lodash
      │
      ▼
-⚠ Vulnerable
+Vulnerable
 ```
 
-Rather than manually modifying the transitive dependency:
+Instead of manually attempting to modify a transitive dependency:
 
 ```text
-❌ Update Lodash directly
+Update Lodash
 ```
 
-DomiNode can identify a higher-level remediation:
+DomiNode can trace the dependency tree backward and identify whether upgrading the direct dependency can automatically resolve the vulnerable version.
 
 ```text
-✅ Upgrade Express
-        ↓
-Safe Lodash version
-        ↓
-Multiple vulnerabilities resolved
+Upgrade Direct Dependency
+          │
+          ▼
+New Dependency Tree
+          │
+          ▼
+Safe Transitive Version
+          │
+          ▼
+Multiple Vulnerabilities Resolved
 ```
 
-The goal:
+The goal is:
 
-> **Minimum changes. Maximum security impact.**
+**Minimum changes → Maximum security impact**
 
 ---
 
-# 📊 Security Dashboard
+# OSV Intelligence
 
-DomiNode provides visibility into the overall security posture of a project.
+DomiNode integrates with OSV to retrieve detailed vulnerability information.
 
-### Vulnerability Severity
+This can include:
 
-```text
-Critical   ████████
-High       █████████████
-Medium     ████████████████
-Low        █████
-```
+* Introduced versions
+* Fixed versions
+* Vulnerable version ranges
+* Attack information
+* Vulnerability descriptions
+* Relevant metadata
 
-### Attack Surface
-
-Understand the difference between:
-
-```text
-Direct Dependencies
-        vs
-Transitive Dependencies
-```
-
-### Dependency Trace
-
-Follow the exact path:
-
-```text
-Application
-   ↓
-Direct Dependency
-   ↓
-Transitive Dependency
-   ↓
-Vulnerable Package
-```
+The objective is to provide developers with the context required to understand both the vulnerability and its remediation.
 
 ---
 
-# 🔬 Research-Backed Approach
+# Security Reports
 
-DomiNode's design is informed by academic research into software supply-chain security.
+DomiNode provides downloadable analysis reports.
 
-The project documentation references three major research papers and uses that research to inform its approach to:
+The project is designed to provide both:
 
-* Dependency relationships
-* Supply-chain threats
-* Vulnerability propagation
-* Risk analysis
-* Security remediation
+### Technical Report
 
-The goal isn't to build another vulnerability scanner.
+A detailed security analysis containing dependency and vulnerability information.
 
-The goal is to improve how vulnerability **context and propagation** are understood.
+### User-Friendly Report
+
+A simplified summary that can be shared with collaborators and stakeholders.
 
 ---
 
-# 🏗️ Architecture
-
-```text
-                    ┌─────────────────┐
-                    │     USER        │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │   DOMINODE UI   │
-                    │                 │
-                    │ Graph / Risk /  │
-                    │ Reports / Intel │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │    BACKEND      │
-                    └────────┬────────┘
-                             │
-          ┌──────────────────┼──────────────────┐
-          │                  │                  │
-          ▼                  ▼                  ▼
-    ┌──────────┐      ┌──────────────┐   ┌─────────────┐
-    │  Parser  │      │ Dependency   │   │  Threat     │
-    │  Engine  │      │  Resolver    │   │ Intelligence│
-    └────┬─────┘      └──────┬───────┘   └──────┬──────┘
-         │                   │                  │
-         │                   ▼                  ▼
-         │             ┌─────────────┐    ┌─────────────┐
-         │             │ Dependency  │    │ OSV / GHSA  │
-         │             │ Graph / DAG │    │ NVD / OSS   │
-         │             └──────┬──────┘    └─────────────┘
-         │                    │
-         └────────────────────┼────────────────────┐
-                              ▼                    │
-                     ┌────────────────┐            │
-                     │  Risk Engine   │            │
-                     └───────┬────────┘            │
-                             │                     │
-                ┌────────────┼────────────┐        │
-                ▼            ▼            ▼        │
-          ┌──────────┐ ┌──────────┐ ┌──────────┐  │
-          │  True    │ │  Taint   │ │ AI Fixes │  │
-          │  Risk    │ │ Analysis │ │          │  │
-          └──────────┘ └──────────┘ └──────────┘  │
-                                                  │
-                              ┌───────────────────┘
-                              ▼
-                       ┌───────────────┐
-                       │    REPORTS    │
-                       └───────────────┘
-```
-
----
-
-# 🌐 Ecosystem Support
+# Supported Ecosystems
 
 DomiNode is designed to analyze projects across multiple package ecosystems.
 
-Current project scope includes:
-
-| Ecosystem        | Dependency Analysis |
-| ---------------- | ------------------- |
-| npm              | ✅                   |
-| PyPI             | ✅                   |
-| Maven            | ✅                   |
-| Go               | ✅                   |
-| Other ecosystems | 🔄 Expanding        |
+| Ecosystem       | Support |
+| --------------- | :-----: |
+| npm             |   Yes   |
+| PyPI            |   Yes   |
+| Maven           |   Yes   |
+| Go              |   Yes   |
+| More ecosystems | Planned |
 
 ---
 
-# 📋 What You Get
+# Architecture
 
-After analyzing a project, DomiNode provides:
-
-### 🔴 Vulnerability Intelligence
-
-Detailed findings categorized by severity.
-
-### 🕸️ Dependency Graph
-
-A visual representation of direct and transitive dependencies.
-
-### 🌊 Propagation Paths
-
-The route a vulnerability can take through the dependency graph.
-
-### 🎯 True Risk Score
-
-Risk based on both vulnerability severity and graph structure.
-
-### 👀 Hidden Risk Indicators
-
-Flags for vulnerabilities whose systemic impact may exceed their isolated score.
-
-### 📊 Attack Surface Analysis
-
-Visibility into direct versus transitive dependency exposure.
-
-### 📑 Reports
-
-Downloadable technical and simplified security reports.
-
----
-
-# 🆚 Why DomiNode?
-
-|                                  | Traditional Scanner | DomiNode |
-| -------------------------------- | ------------------: | -------: |
-| Vulnerability detection          |                   ✅ |        ✅ |
-| Dependency analysis              |                   ✅ |        ✅ |
-| Transitive dependency visibility |             Limited |        ✅ |
-| Dependency graph                 |         ❌ / Limited |        ✅ |
-| Blast-radius analysis            |                   ❌ |        ✅ |
-| True Risk Score                  |                   ❌ |        ✅ |
-| Propagation simulation           |                   ❌ |        ✅ |
-| Taint analysis                   |                   ❌ |        ✅ |
-| Multi-source intelligence        |                Some |        ✅ |
-| Explainable risk                 |             Limited |        ✅ |
-| AI remediation                   |             Limited |   🚀 Pro |
-| Detailed reports                 |                   ✅ |        ✅ |
+```text
+                    ┌──────────────┐
+                    │    Project   │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │    Parser    │
+                    └──────┬───────┘
+                           │
+                           ▼
+                 ┌────────────────────┐
+                 │ Dependency Resolver│
+                 └──────────┬─────────┘
+                            │
+                            ▼
+                 ┌────────────────────┐
+                 │  Dependency Graph  │
+                 └──────────┬─────────┘
+                            │
+             ┌──────────────┼──────────────┐
+             │              │              │
+             ▼              ▼              ▼
+       ┌──────────┐   ┌──────────┐   ┌──────────┐
+       │   OSV    │   │   NVD    │   │   GHSA   │
+       └────┬─────┘   └────┬─────┘   └────┬─────┘
+            │              │              │
+            └──────────────┼──────────────┘
+                           ▼
+                 ┌────────────────────┐
+                 │ Threat Intelligence│
+                 └──────────┬─────────┘
+                            │
+                ┌───────────┼───────────┐
+                ▼           ▼           ▼
+           True Risk    Taint       Remediation
+             Score      Analysis      Engine
+                │           │           │
+                └───────────┼───────────┘
+                            ▼
+                     Security Report
+```
 
 ---
 
-# 🚀 Getting Started
+# DomiNode vs Traditional Scanners
 
-> **Repository setup instructions will depend on the implementation.**
+| Capability                | Traditional Scanner | DomiNode |
+| ------------------------- | :-----------------: | :------: |
+| Vulnerability Detection   |         Yes         |    Yes   |
+| Dependency Analysis       |         Yes         |    Yes   |
+| Transitive Dependencies   |       Limited       |    Yes   |
+| Dependency Graph          |       Limited       |    Yes   |
+| Blast Radius              |          No         |    Yes   |
+| Contextual Risk           |       Limited       |    Yes   |
+| Propagation Analysis      |          No         |    Yes   |
+| Taint Analysis            |          No         |    Yes   |
+| Multi-Source Intelligence |         Some        |    Yes   |
+| Dependency Trace          |       Limited       |    Yes   |
+| AI Remediation            |       Limited       |  Planned |
+| Security Reports          |         Yes         |    Yes   |
+
+---
+
+# Getting Started
+
+> Setup commands depend on the current implementation of the repository.
 
 Clone the repository:
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
-cd <YOUR_REPOSITORY_DIRECTORY>
+git clone <repository-url>
+cd dominode
 ```
 
-Install dependencies according to the project's configured ecosystem.
-
-For example:
+Install the project dependencies:
 
 ```bash
-npm install
+<install-command>
 ```
 
-or:
+Configure the required environment variables:
 
 ```bash
-pip install -r requirements.txt
+<environment-configuration>
 ```
 
-Start the application using the project's development command.
+Start DomiNode:
 
 ```bash
-npm run dev
+<start-command>
 ```
-
-> Replace these commands with the exact commands configured in the repository.
 
 ---
 
-# 🗺️ Roadmap
+# Roadmap
 
-### Core
+## Security Analysis
 
-* [x] Dependency graph concept
+* [x] Dependency graph generation
+* [x] Direct dependency analysis
 * [x] Transitive dependency analysis
 * [x] Multi-source vulnerability intelligence
-* [x] True Risk Score concept
-* [x] Propagation / taint analysis concept
-* [x] Security reporting
+* [x] True Risk Score
+* [x] Propagation analysis
+* [x] Taint analysis
+* [x] Vulnerability severity distribution
+* [x] Dependency trace paths
+* [x] Security reports
 
-### Next
+## Coming Next
 
 * [ ] Expanded ecosystem support
-* [ ] Improved graph visualization
-* [ ] Advanced attack-path analysis
 * [ ] Continuous dependency monitoring
-* [ ] More detailed remediation recommendations
+* [ ] Advanced attack-path analysis
+* [ ] Improved graph visualization
+* [ ] Advanced vulnerability prioritization
 
-### DomiNode Pro
+## DomiNode Pro
 
-* [ ] AI-powered dependency remediation
-* [ ] Automated AI pull requests
-* [ ] CI/CD pipeline security blocks
+* [ ] AI-powered remediation
+* [ ] Automated pull requests
+* [ ] CI/CD security gates
 * [ ] Compliance exports
 * [ ] Security certification
 * [ ] Enterprise security workflows
 
 ---
 
-# 💎 DomiNode Pro
+# Research
 
-The free experience is designed around **visibility and diagnosis**.
+DomiNode's approach is informed by academic research into software supply-chain security.
 
-DomiNode Pro extends that into **automated remediation and enterprise security workflows**.
+The project documentation references three major research papers that contributed to the design of its security analysis approach.
 
-```text
-              FREE
-                │
-                ▼
-       See the vulnerabilities
-                │
-                ▼
-        Understand the risk
-                │
-                ▼
-         See the propagation
-                │
-                ▼
-             PRO
-                │
-                ▼
-       Automate the response
-```
-
-Planned Pro capabilities include:
-
-* AI remediation
-* Automated pull requests
-* CI/CD security gates
-* Compliance reporting
-* Enterprise workflows
+Research references will be added here as the project documentation is finalized.
 
 ---
 
-# 🤝 Contributing
+# Contributing
 
 Contributions are welcome.
 
-If you have an idea, improvement, bug fix, or security research that could make DomiNode better:
+If you want to improve DomiNode:
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Make your changes.
+4. Test your changes.
+5. Open a pull request.
 
 ```bash
 git checkout -b feature/your-feature
-```
-
-Make your changes, test them, and open a pull request.
-
-For larger changes, open an issue first so the approach can be discussed.
-
----
-
-# 🔐 Security
-
-If you discover a security issue in DomiNode, please report it responsibly.
-
-Security vulnerabilities should not be disclosed publicly before the maintainers have had an opportunity to investigate.
-
-> Add your project's security contact or `SECURITY.md` process here.
-
----
-
-# 📄 License
-
-Add the project's license here.
-
-Example:
-
-```text
-MIT License
+git add .
+git commit -m "Add your feature"
+git push origin feature/your-feature
 ```
 
 ---
 
-# 👥 Team
+# License
 
-### Team Card Board Box
-
-**DomiNode**
+License information will be added when the project's license is finalized.
 
 ---
 
-<p align="center">
-  <strong>Why just tell you when we can show you?</strong>
-</p>
+## DomiNode
 
-<p align="center">
-  <i>Map the dependency. See the ripple. Fix the risk.</i>
-</p>
+> **Map the dependency. See the ripple. Fix the risk.**
+
+**Why just tell you when we can show you?**

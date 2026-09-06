@@ -480,14 +480,6 @@ Start DomiNode:
 * [x] Dependency trace paths
 * [x] Security reports
 
-## Coming Next
-
-* [ ] Expanded ecosystem support
-* [ ] Continuous dependency monitoring
-* [ ] Advanced attack-path analysis
-* [ ] Improved graph visualization
-* [ ] Advanced vulnerability prioritization
-
 ## DomiNode Pro
 
 * [ ] AI-powered remediation
@@ -509,35 +501,3 @@ Research references will be added here as the project documentation is finalized
 
 ---
 
-# Contributing
-
-Contributions are welcome.
-
-If you want to improve DomiNode:
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Make your changes.
-4. Test your changes.
-5. Open a pull request.
-
-```bash
-git checkout -b feature/your-feature
-git add .
-git commit -m "Add your feature"
-git push origin feature/your-feature
-```
-
----
-
-# License
-
-License information will be added when the project's license is finalized.
-
----
-
-## DomiNode
-
-> **Map the dependency. See the ripple. Fix the risk.**
-
-**Why just tell you when we can show you?**

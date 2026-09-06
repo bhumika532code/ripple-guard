@@ -101,10 +101,10 @@ function initEcosystemState() {
 }
 
 function riskColor(score) {
-  if (score >= 70) return "#c4432b"; // Red — Critical
-  if (score >= 52) return "#e67e22"; // Orange — High
-  if (score >= 35) return "#c9a227"; // Yellow — Medium
-  return "#4c8c6b";                  // Green — Low
+  if (score >= 70) return "#ef4444"; // Red — Critical
+  if (score >= 52) return "#f97316"; // Orange — High
+  if (score >= 35) return "#facc15"; // Yellow — Medium
+  return "#22c55e";                  // Green — Low
 }
 
 function riskLabel(score) {

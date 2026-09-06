@@ -181,11 +181,13 @@ function drawDependencyGraph() {
     const to = POSITIONS[toId];
 
     const line = createSvgElement("line", {
-      x1: from.x, y1: from.y + 15,
-      x2: to.x, y2: to.y - 15,
+      x1: from.x, y1: from.y,
+      x2: to.x, y2: to.y,
       stroke: "rgba(71, 85, 105, 0.45)",
       "stroke-width": 1.2,
-      class: "graph-edge"
+      class: "graph-edge",
+      "data-from": fromId,
+      "data-to": toId
     });
     svg.appendChild(line);
   });
@@ -228,12 +230,82 @@ function drawDependencyGraph() {
     const label = createSvgElement("text", {
       x: pos.x,
       y: pos.y + 30,
-      class: "node-label"
+      class: "node-label",
+      "data-id": node.id
     });
     label.textContent = node.name;
 
     svg.appendChild(circle);
     svg.appendChild(label);
+  });
+
+  // Enable drag and drop for nodes
+  let draggedNode = null;
+  let dragOffset = { x: 0, y: 0 };
+
+  svg.addEventListener('mousedown', (e) => {
+    if (e.target.tagName === 'circle') {
+      draggedNode = e.target;
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+      
+      const cx = parseFloat(draggedNode.getAttribute('cx'));
+      const cy = parseFloat(draggedNode.getAttribute('cy'));
+      dragOffset.x = svgP.x - cx;
+      dragOffset.y = svgP.y - cy;
+      
+      // Bring to front
+      svg.appendChild(draggedNode);
+      const id = draggedNode.getAttribute('data-id');
+      const label = svg.querySelector(`text[data-id="${id}"]`);
+      if (label) svg.appendChild(label);
+    }
+  });
+
+  svg.addEventListener('mousemove', (e) => {
+    if (draggedNode) {
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+      
+      const newX = svgP.x - dragOffset.x;
+      const newY = svgP.y - dragOffset.y;
+      
+      draggedNode.setAttribute('cx', newX);
+      draggedNode.setAttribute('cy', newY);
+      
+      const id = draggedNode.getAttribute('data-id');
+      const label = svg.querySelector(`text[data-id="${id}"]`);
+      if (label) {
+        label.setAttribute('x', newX);
+        label.setAttribute('y', newY + 30);
+      }
+      
+      svg.querySelectorAll(`line[data-from="${id}"]`).forEach(line => {
+        line.setAttribute('x1', newX);
+        line.setAttribute('y1', newY);
+      });
+      svg.querySelectorAll(`line[data-to="${id}"]`).forEach(line => {
+        line.setAttribute('x2', newX);
+        line.setAttribute('y2', newY);
+      });
+    }
+  });
+
+  svg.addEventListener('mouseup', () => {
+    if (draggedNode) {
+      const id = draggedNode.getAttribute('data-id');
+      POSITIONS[id].x = parseFloat(draggedNode.getAttribute('cx'));
+      POSITIONS[id].y = parseFloat(draggedNode.getAttribute('cy'));
+      draggedNode = null;
+    }
+  });
+
+  svg.addEventListener('mouseleave', () => {
+    draggedNode = null;
   });
 }
 

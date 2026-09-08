@@ -8,13 +8,41 @@ function computePositions() {
     if (!byLayer[node.layer]) byLayer[node.layer] = [];
     byLayer[node.layer].push(node);
   });
-  Object.keys(byLayer).forEach(layer => {
-    const nodesInLayer = byLayer[layer];
+
+  // Track dependencies to sort nodes by their parent's X position (barycenter heuristic)
+  const parents = {};
+  NODES.forEach(n => parents[n.id] = []);
+  EDGES.forEach(([from, to]) => {
+    parents[to].push(from);
+  });
+
+  const layerKeys = Object.keys(byLayer).sort((a, b) => a - b);
+
+  layerKeys.forEach(layer => {
+    let nodesInLayer = byLayer[layer];
+
+    if (layer > 0) {
+      nodesInLayer.forEach(node => {
+        let sumX = 0;
+        let count = 0;
+        parents[node.id].forEach(parentId => {
+          if (positions[parentId]) {
+            sumX += positions[parentId].x;
+            count++;
+          }
+        });
+        node._idealX = count > 0 ? sumX / count : VIEW_WIDTH / 2;
+      });
+      nodesInLayer.sort((a, b) => a._idealX - b._idealX);
+    }
+
     const spacing = VIEW_WIDTH / (nodesInLayer.length + 1);
     nodesInLayer.forEach((node, index) => {
-      positions[node.id] = { x: spacing * (index + 1), y: LAYER_Y[node.layer] };
+      const stagger = (index % 2 === 0) ? -35 : 35;
+      positions[node.id] = { x: spacing * (index + 1), y: LAYER_Y[node.layer] + stagger };
     });
   });
+
   return positions;
 }
 

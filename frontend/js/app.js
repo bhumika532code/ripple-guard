@@ -149,31 +149,7 @@ function drawDependencyGraph() {
   if (!svg) return;
   svg.innerHTML = "";
 
-  // Layer guidelines/labels
-  const layerNames = {
-    0: "APPLICATIONS (ROOT ENTRIPOINTS)",
-    1: "SERVICES & MID-TIER LIBS",
-    2: "SHARED LOW-LEVEL LIBS",
-    3: "DEEP CORE UTILITIES"
-  };
 
-  Object.keys(LAYER_Y).forEach(layer => {
-    const y = LAYER_Y[layer];
-    const guide = createSvgElement("line", {
-      x1: 20, y1: y,
-      x2: VIEW_WIDTH - 20, y2: y,
-      stroke: "rgba(56, 189, 248, 0.05)",
-      "stroke-dasharray": "4 6",
-      "stroke-width": 1
-    });
-    const label = createSvgElement("text", {
-      x: 30, y: y - 16,
-      class: "layer-indicator-label"
-    });
-    label.textContent = layerNames[layer];
-    svg.appendChild(guide);
-    svg.appendChild(label);
-  });
 
   // Edges
   EDGES.forEach(([fromId, toId]) => {
@@ -225,11 +201,14 @@ function drawDependencyGraph() {
     }
     circle.appendChild(title);
 
-    circle.addEventListener("click", () => showNodeDetails(node.id));
+    circle.addEventListener("click", () => {
+      simulateLaserPropagation(node.id);
+    });
 
+    const isStaggeredUp = pos.y < LAYER_Y[node.layer];
     const label = createSvgElement("text", {
       x: pos.x,
-      y: pos.y + 30,
+      y: isStaggeredUp ? pos.y - 22 : pos.y + 35,
       class: "node-label",
       "data-id": node.id
     });
@@ -242,10 +221,12 @@ function drawDependencyGraph() {
   // Enable drag and drop for nodes
   let draggedNode = null;
   let dragOffset = { x: 0, y: 0 };
+  let isDragging = false;
 
   svg.addEventListener('mousedown', (e) => {
     if (e.target.tagName === 'circle') {
       draggedNode = e.target;
+      isDragging = false;
       const pt = svg.createSVGPoint();
       pt.x = e.clientX;
       pt.y = e.clientY;
@@ -255,17 +236,20 @@ function drawDependencyGraph() {
       const cy = parseFloat(draggedNode.getAttribute('cy'));
       dragOffset.x = svgP.x - cx;
       dragOffset.y = svgP.y - cy;
-      
-      // Bring to front
-      svg.appendChild(draggedNode);
-      const id = draggedNode.getAttribute('data-id');
-      const label = svg.querySelector(`text[data-id="${id}"]`);
-      if (label) svg.appendChild(label);
     }
   });
 
   svg.addEventListener('mousemove', (e) => {
     if (draggedNode) {
+      if (!isDragging) {
+        isDragging = true;
+        // Bring to front ONLY when we actually start moving
+        svg.appendChild(draggedNode);
+        const id = draggedNode.getAttribute('data-id');
+        const label = svg.querySelector(`text[data-id="${id}"]`);
+        if (label) svg.appendChild(label);
+      }
+
       const pt = svg.createSVGPoint();
       pt.x = e.clientX;
       pt.y = e.clientY;
@@ -493,7 +477,7 @@ function resetPropagation() {
   const select = document.getElementById("prop-node-select");
   if (select) select.value = "";
 
-  drawPropagationBaseGraph(null, new Map());
+  dimGraphForSimulation(null, new Map());
 
   const panel = document.getElementById("prop-info-panel");
   if (panel) {
@@ -505,117 +489,63 @@ function resetPropagation() {
   }
 }
 
-function drawPropagationBaseGraph(compromisedId, affectedDistances) {
-  const svg = document.getElementById("propagation-graph");
+function dimGraphForSimulation(compromisedId, affectedDistances) {
+  const svg = document.getElementById("graph");
   if (!svg) return;
-  svg.innerHTML = "";
-
   const affectedIds = new Set(affectedDistances.keys());
-
-  // Layer guidelines
-  const layerNames = {
-    0: "APPLICATIONS",
-    1: "SERVICES & MID-TIER",
-    2: "SHARED LIBRARIES",
-    3: "DEEP CORE UTILITIES"
-  };
-
-  Object.keys(LAYER_Y).forEach(layer => {
-    const y = LAYER_Y[layer];
-    const guide = createSvgElement("line", {
-      x1: 20, y1: y,
-      x2: VIEW_WIDTH - 20, y2: y,
-      stroke: "rgba(56, 189, 248, 0.05)",
-      "stroke-dasharray": "4 6",
-      "stroke-width": 1
-    });
-    const label = createSvgElement("text", {
-      x: 30, y: y - 16,
-      class: "layer-indicator-label"
-    });
-    label.textContent = layerNames[layer];
-    svg.appendChild(guide);
-    svg.appendChild(label);
-  });
-
-  // Conduit Edges
-  EDGES.forEach(([fromId, toId]) => {
-    const from = POSITIONS[fromId];
-    const to = POSITIONS[toId];
-
-    const isTainted = compromisedId &&
-      (fromId === compromisedId || affectedIds.has(fromId)) &&
-      (toId === compromisedId || affectedIds.has(toId));
-
-    const line = createSvgElement("line", {
-      x1: from.x, y1: from.y + 15,
-      x2: to.x, y2: to.y - 15,
-      class: `conduit-edge ${isTainted ? 'tainted' : ''}`,
-      id: `edge-${toId}-${fromId}`
-    });
-    svg.appendChild(line);
-  });
 
   // Nodes
   NODES.forEach(node => {
-    const pos = POSITIONS[node.id];
+    const circle = svg.querySelector(`circle[data-id="${node.id}"]`);
+    const label = svg.querySelector(`text[data-id="${node.id}"]`);
+    if (!circle) return;
+
     const isApp = node.type === "app";
     const isCompromisedOrigin = node.id === compromisedId;
     const isAffected = affectedIds.has(node.id);
 
     let fill = isApp ? "var(--node-app)" : riskColor(METRICS[node.id].trueRisk);
     let stroke = isApp ? "var(--node-app-border)" : "rgba(255, 255, 255, 0.25)";
+    let labelFill = null;
+    let opacity = "1";
 
     if (isCompromisedOrigin) {
       fill = "#ffffff";
       stroke = "var(--water-cyan-bright)";
+      circle.setAttribute("stroke-width", "3");
+
+      // Add aura if not exists
+      if (!svg.querySelector(`.pulse-origin-aura[data-id="${node.id}"]`)) {
+        const pos = POSITIONS[node.id];
+        const aura = createSvgElement("circle", {
+          cx: pos.x, cy: pos.y, r: 16, class: "pulse-origin-aura", "data-id": node.id
+        });
+        svg.insertBefore(aura, circle);
+      }
     } else if (isAffected) {
       fill = "#c4432b";
       stroke = "#fca5a5";
     } else if (compromisedId) {
-      // Unaffected dimmed nodes
-      fill = "#141824";
-      stroke = "rgba(71, 85, 105, 0.3)";
+      opacity = "0.2";
+      labelFill = "#475569";
     }
 
-    // Origin pulsing shockwave
-    if (isCompromisedOrigin) {
-      const aura = createSvgElement("circle", {
-        cx: pos.x,
-        cy: pos.y,
-        r: 16,
-        class: "pulse-origin-aura"
-      });
-      svg.appendChild(aura);
+    circle.setAttribute("fill", fill);
+    circle.setAttribute("stroke", stroke);
+    circle.style.opacity = opacity;
+    if (label && labelFill) label.style.fill = labelFill;
+    else if (label) label.style.fill = "";
+  });
+
+  // Dim edges
+  EDGES.forEach(([fromId, toId]) => {
+    const line = svg.querySelector(`line[data-from="${fromId}"][data-to="${toId}"]`);
+    if (line) {
+      line.style.stroke = "";
+      line.style.strokeWidth = "";
+      line.style.filter = "";
+      line.classList.remove("conduit-edge", "tainted", "laser-active");
     }
-
-    const circle = createSvgElement("circle", {
-      cx: pos.x,
-      cy: pos.y,
-      r: isApp ? 15 : 13,
-      fill: fill,
-      stroke: stroke,
-      "stroke-width": isCompromisedOrigin ? 3 : (isApp ? 2 : 1.5),
-      class: "graph-node",
-      id: `prop-node-${node.id}`
-    });
-
-    circle.addEventListener("click", () => {
-      if (node.type === "package") {
-        simulateLaserPropagation(node.id);
-      }
-    });
-
-    const label = createSvgElement("text", {
-      x: pos.x,
-      y: pos.y + 30,
-      class: "node-label",
-      style: (compromisedId && !isCompromisedOrigin && !isAffected) ? "fill:#475569;" : ""
-    });
-    label.textContent = node.name;
-
-    svg.appendChild(circle);
-    svg.appendChild(label);
   });
 }
 
@@ -649,7 +579,7 @@ function simulateLaserPropagation(startId) {
   const maxHop = Math.max(0, ...Object.keys(hopGroups).map(Number));
 
   // Render initial base graph with origin node active
-  drawPropagationBaseGraph(startId, new Map());
+  dimGraphForSimulation(startId, affected);
 
   // Trigger water drop canvas wave at center
   if (typeof window.triggerWaterDrop === "function") {
@@ -657,7 +587,7 @@ function simulateLaserPropagation(startId) {
     window.triggerWaterDrop(window.innerWidth * (startPos.x / VIEW_WIDTH), window.innerHeight * 0.7, 0.7);
   }
 
-  const svg = document.getElementById("propagation-graph");
+  const svg = document.getElementById("graph");
 
   // Animate hop waves sequentially
   const hopDelay = 600; // ms per hop
@@ -704,49 +634,36 @@ function fireLaserPulse(svg, fromId, toId) {
   const from = POSITIONS[fromId];
   const to = POSITIONS[toId];
 
-  // Energize conduit edge
-  const edgeEl = document.getElementById(`edge-${fromId}-${toId}`);
-  if (edgeEl) {
-    edgeEl.classList.add("laser-active");
-    edgeEl.classList.add("tainted");
-  }
-
-  // Create laser photon projectile
-  const photon = createSvgElement("circle", {
-    cx: from.x,
-    cy: from.y - 15,
-    r: 4.5,
-    class: "laser-photon"
+  // Draw an instant laser strike from A to B (white core, massive blue glow)
+  const laser = createSvgElement("line", {
+    x1: from.x, y1: from.y,
+    x2: to.x, y2: to.y,
+    stroke: "#ffffff",
+    "stroke-width": 5,
+    "stroke-linecap": "round",
+    style: "filter: drop-shadow(0 0 15px #00e5ff) drop-shadow(0 0 30px #00e5ff); transition: opacity 0.25s ease-out;"
   });
-  svg.appendChild(photon);
+  svg.appendChild(laser);
 
-  const startTime = performance.now();
-  const duration = 400; // ms
+  // Fade out the laser flash shortly after striking
+  setTimeout(() => {
+    laser.style.opacity = "0";
+    setTimeout(() => laser.remove(), 250);
+  }, 100);
 
-  function animate(now) {
-    const elapsed = now - startTime;
-    const progress = Math.min(1, elapsed / duration);
-    // Smooth ease-in-out trajectory
-    const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
-
-    const curX = from.x + (to.x - from.x) * ease;
-    const curY = (from.y - 15) + ((to.y + 15) - (from.y - 15)) * ease;
-
-    photon.setAttribute("cx", curX);
-    photon.setAttribute("cy", curY);
-
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    } else {
-      photon.remove();
-    }
+  // Permanently highlight the conduit edge with a bright neon blue glow
+  const edgeEl = svg.querySelector(`line[data-from="${fromId}"][data-to="${toId}"]`);
+  if (edgeEl) {
+    setTimeout(() => {
+      edgeEl.style.stroke = "#00e5ff";
+      edgeEl.style.strokeWidth = "3.5";
+      edgeEl.style.filter = "drop-shadow(0 0 12px #00e5ff) drop-shadow(0 0 24px #38bdf8)";
+    }, 50);
   }
-
-  requestAnimationFrame(animate);
 }
 
 function illuminateNode(svg, nodeId) {
-  const nodeEl = document.getElementById(`prop-node-${nodeId}`);
+  const nodeEl = svg.querySelector(`circle[data-id="${nodeId}"]`);
   const pos = POSITIONS[nodeId];
 
   if (nodeEl) {
@@ -769,7 +686,7 @@ function illuminateNode(svg, nodeId) {
 }
 
 function updatePropagationPanel(node, affected, hopGroups) {
-  const panel = document.getElementById("prop-info-panel");
+  const panel = document.getElementById("graph-info-panel");
   if (!panel) return;
 
   const affectedApps = [...affected.keys()].filter(id => NODES.find(n => n.id === id).type === "app");

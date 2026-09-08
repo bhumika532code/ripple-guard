@@ -109,8 +109,8 @@
       <nav class="nav-links">
         <a class="nav-item" href="#section-graph">01 Graph</a>
         <a class="nav-item" href="#section-scoreboard">02 Scoreboard</a>
-        <a class="nav-item" href="#section-intel">03 Intel</a>
-        <a class="nav-item" href="#section-propagation">04 Simulator</a>
+        <a class="nav-item" href="#section-blockchain">03 Blockchain</a>
+        <a class="nav-item" href="#section-intel">04 Intel</a>
         <a class="nav-item nav-pro" href="#section-pro">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -200,13 +200,13 @@
       <div class="analysis-container">
 
         <!-- ===================================================================
-             SECTION 01: DEPENDENCY GRAPH
+             SECTION 01: DEPENDENCY GRAPH SIMULATOR
              =================================================================== -->
         <section id="section-graph" class="analysis-section">
           <div class="section-header-row">
             <div class="section-title-group">
               <span class="section-num">SECTION 01</span>
-              <h2 class="section-title">Dependency Graph</h2>
+              <h2 class="section-title">Dependency Graph Simulator</h2>
               <p class="section-desc">
                 Visualize how applications, packages, and dependencies connect across your project.
               </p>
@@ -220,6 +220,25 @@
               <div class="legend-item"><span class="legend-dot med"></span><span>Medium (35-51)</span></div>
               <div class="legend-item"><span class="legend-dot low"></span><span>Low (&lt;35)</span></div>
               <div class="legend-item"><span class="legend-dot app"></span><span>Application</span></div>
+            </div>
+          </div>
+
+          <div class="simulator-controls-bar" style="margin-top: -10px; margin-bottom: 20px;">
+            <div class="control-input-group">
+              <label for="prop-node-select" class="control-label">Origin Package:</label>
+              <select id="prop-node-select">
+                <option value="">Choose a package to compromise…</option>
+              </select>
+            </div>
+
+            <div class="simulator-btn-group">
+              <button id="btn-trigger-pulse" class="btn-trigger-pulse">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Trigger Laser Pulse</span>
+              </button>
+              <button id="btn-reset-sim" class="btn-reset-sim">Reset Simulator</button>
             </div>
           </div>
 
@@ -238,8 +257,7 @@
                 Node Analysis
               </h3>
               <div class="info-placeholder">
-                Click any package circle in the graph to inspect reported score, true risk calculation, direct
-                dependents, and apps at risk.
+                Click any package circle in the graph to inspect reported score, true risk calculation, or run a taint analysis to simulate a compromise.
               </div>
             </aside>
           </div>
@@ -285,12 +303,75 @@
 
 
         <!-- ===================================================================
-             SECTION 03: THREAT INTELLIGENCE DASHBOARD
+             SECTION 03: BLOCKCHAIN PROVENANCE
+             =================================================================== -->
+        <section id="section-blockchain" class="analysis-section">
+          <div class="section-header-row">
+            <div class="section-title-group">
+              <span class="section-num" style="color: #fbbf24;">SECTION 03</span>
+              <h2 class="section-title">Blockchain Provenance</h2>
+              <p class="section-desc">Immutable attestation of your dependency analysis.</p>
+            </div>
+          </div>
+          <div class="pro-grid">
+            <!-- Left Placeholder -->
+            <div class="pro-panel glass-panel" style="border-top-color: #94a3b8;">
+              <div class="pro-panel-header">
+                <div class="pro-panel-title">
+                  <span>Reserved Module</span>
+                </div>
+              </div>
+              <div class="pro-panel-body">
+                <p class="pro-desc">Space reserved for future module integration.</p>
+              </div>
+            </div>
+
+            <!-- Right: Blockchain -->
+            <div class="pro-panel glass-panel">
+              <div class="pro-panel-header">
+                <div class="pro-panel-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                  </svg>
+                  <span>Blockchain Provenance</span>
+                </div>
+              </div>
+              <div class="pro-panel-body" style="display: flex; flex-direction: column; gap: 12px;">
+                <p class="pro-desc">Generate an immutable cryptographic hash of the original and patched manifests to ensure tamper-proof attestation.</p>
+                
+                <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 12px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Original Hash</span>
+                    <span id="hash-original" style="font-family: monospace; font-size: 12px; color: #f8fafc;">---</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Patched Hash</span>
+                    <span id="hash-patched" style="font-family: monospace; font-size: 12px; color: #34d399;">---</span>
+                  </div>
+                </div>
+
+                <button id="btn-seal-blockchain" class="btn-pro-action" style="background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.4); color: #fbbf24; margin-top: 10px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="M9 12l2 2 4-4"></path>
+                  </svg>
+                  Seal to Polygon Testnet
+                </button>
+                <div id="blockchain-status" style="font-size: 12px; color: #94a3b8; text-align: center; display: none;"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================================
+             SECTION 04: THREAT INTELLIGENCE
              =================================================================== -->
         <section id="section-intel" class="analysis-section">
           <div class="section-header-row">
             <div class="section-title-group">
-              <span class="section-num">SECTION 03</span>
+              <span class="section-num">SECTION 04</span>
               <h2 class="section-title">Threat Intelligence</h2>
               <p class="section-desc">
                 Research-backed analysis of vulnerability severity distribution, attack surface composition, and dependency trace paths.
@@ -344,60 +425,7 @@
         </section>
 
 
-        <!-- ===================================================================
-             SECTION 04: PROPAGATION SIMULATOR
-             =================================================================== -->
-        <section id="section-propagation" class="analysis-section">
-          <div class="section-header-row">
-            <div class="section-title-group">
-              <span class="section-num">SECTION 04</span>
-              <h2 class="section-title">Propagation Simulator</h2>
-              <p class="section-desc">
-                Select a vulnerable dependency and visualize how a compromise shoots energy pulses through connected
-                packages and applications.
-              </p>
-            </div>
-          </div>
 
-          <!-- Interactive Simulator Controls -->
-          <div class="simulator-controls-bar">
-            <div class="control-input-group">
-              <label for="prop-node-select" class="control-label">Origin Package:</label>
-              <select id="prop-node-select">
-                <option value="">Choose a package to compromise…</option>
-              </select>
-            </div>
-
-            <div class="simulator-btn-group">
-              <button id="btn-trigger-pulse" class="btn-trigger-pulse">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                </svg>
-                <span>Trigger Laser Pulse</span>
-              </button>
-              <button id="btn-reset-sim" class="btn-reset-sim">Reset</button>
-            </div>
-          </div>
-
-          <div class="graph-workspace">
-            <div class="graph-view-card glass-panel">
-              <svg id="propagation-graph" viewBox="0 0 900 550"></svg>
-            </div>
-
-            <aside id="prop-info-panel" class="details-side-card">
-              <h3>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-cyan)" stroke-width="2">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                </svg>
-                Cascade Diagnostics
-              </h3>
-              <div class="info-placeholder">
-                Select a package above or click any node on the graph to watch a laser pulse traverse through network
-                conduits hop by hop.
-              </div>
-            </aside>
-          </div>
-        </section>
 
 
         <!-- ===================================================================
@@ -468,7 +496,7 @@
                   </button>
                 </div>
                 
-                <div id="instant-fix-container" style="display: none; margin-bottom: 16px;">
+                <div id="instant-fix-container" style="display: block; margin-bottom: 16px;">
                   <button id="btn-instant-download" class="btn-primary" style="width: 100%; padding: 12px; font-weight: bold; font-size: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); display: flex; align-items: center; justify-content: center; gap: 8px;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -529,7 +557,9 @@
               </div>
             </div>
             
-            <!-- PANEL 4: Security Certification -->
+
+
+            <!-- PANEL 5: Security Certification -->
             <div class="pro-panel glass-panel cert-panel" style="border-top-color: #3b82f6;">
               <div class="pro-panel-header">
                 <div class="pro-panel-title">
@@ -570,7 +600,8 @@
                   
                   <div class="cert-body-formal">
                     <p class="cert-declaration">
-                      This document formally certifies that the software manifest designated as <strong id="cert-file-name-formal" class="cert-highlight">---</strong> has undergone comprehensive automated vulnerability analysis using the DomiNode Threat Intelligence Engine. The analysis evaluated the full dependency graph for known Common Vulnerabilities and Exposures (CVEs) and calculated the true cascading blast radius of all components.
+                      This document formally certifies that the software manifest designated as <strong id="cert-file-name-formal" class="cert-highlight">---</strong> has undergone comprehensive automated vulnerability analysis using the DomiNode Threat Intelligence Engine. The analysis evaluated the full dependency graph for known Common Vulnerabilities and Exposures (CVEs) and calculated the true cascading blast radius of all components.<br><br>
+                      <span style="color: #fbbf24; font-weight: 500;">Blockchain Attestation:</span> You should trust our scores because we have blockchain to keep our records safe. The original and remediated dependency state hashes have been sealed for integrity verification.
                     </p>
                     
                     <div class="cert-metrics-grid">

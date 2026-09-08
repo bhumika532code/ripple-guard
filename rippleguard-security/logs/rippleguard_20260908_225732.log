@@ -1,0 +1,10 @@
+[2026-09-08 22:57:32] INFO    RippleGuard scan started. Scan ID: RG-20260908-C3F68A
+[2026-09-08 22:57:32] INFO    Dependency analysis started.
+[2026-09-08 22:57:33] INFO    Dependency graph created. Packages discovered: 87
+[2026-09-08 22:57:33] INFO    Dependency analysis completed.
+[2026-09-08 22:57:33] INFO    Taint analysis started.
+[2026-09-08 22:57:39] WARNING SQL Injection detected in test_project\app.py at line 12
+[2026-09-08 22:57:44] WARNING Command Injection detected in test_project\app.py at line 18
+[2026-09-08 22:57:48] WARNING Path Traversal detected in test_project\app.py at line 24
+[2026-09-08 22:57:48] INFO    Taint analysis completed. Findings discovered: 3
+[2026-09-08 22:57:48] INFO    ZAP scan started against http://host.docker.internal:5000

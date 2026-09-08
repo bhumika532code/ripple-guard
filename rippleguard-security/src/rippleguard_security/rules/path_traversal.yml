@@ -1,0 +1,13 @@
+rules:
+  - id: rippleguard-path-traversal
+    languages:
+      - python
+    message: User-controlled data reaches a file access sink.
+    severity: ERROR
+    mode: taint
+
+    pattern-sources:
+      - pattern: input(...)
+
+    pattern-sinks:
+      - pattern: open($PATH, ...)

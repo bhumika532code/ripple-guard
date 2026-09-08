@@ -1,0 +1,13 @@
+rules:
+  - id: rippleguard-sql-injection
+    languages:
+      - python
+    message: User-controlled data reaches a SQL execution sink.
+    severity: ERROR
+    mode: taint
+
+    pattern-sources:
+      - pattern: input(...)
+
+    pattern-sinks:
+      - pattern: $CONNECTION.execute($QUERY)

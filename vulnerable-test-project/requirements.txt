@@ -1,0 +1,10 @@
+Flask==1.0
+requests==2.19.1
+Django==2.2.8
+Jinja2==2.10
+pyyaml==5.1
+urllib3==1.24.1
+Pillow==6.0.0
+cryptography==2.8
+paramiko==2.6.0
+setuptools==39.0.1

@@ -27,18 +27,22 @@ function parsePackageJson(content) {
     ...(pkg.peerDependencies || {}),
     ...(pkg.optionalDependencies || {}),
   };
-  return { ecosystem: 'npm', appName: pkg.name || 'npm-project', deps: Object.keys(deps) };
+  return { ecosystem: 'npm', appName: pkg.name || 'npm-project', deps: Object.keys(deps), versions: deps };
 }
 
 function parseRequirementsTxt(content) {
-  // Handles requirements.txt, constraints.txt, pip freeze output
-  const deps = content
-    .split('\n')
-    .map(l => l.trim())
-    .filter(l => l && !l.startsWith('#') && !l.startsWith('-'))
-    .map(l => l.split(/[=<>!~;\[]/)[0].trim())
-    .filter(Boolean);
-  return { ecosystem: 'PyPI', appName: 'python-project', deps: [...new Set(deps)] };
+  const deps = [];
+  const versions = {};
+  content.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#') && !l.startsWith('-')).forEach(l => {
+    const parts = l.split(/[=<>!~;\[]/);
+    const name = parts[0].trim();
+    if (name) {
+      deps.push(name);
+      const verMatch = l.match(/[=<>!~]+(.*)/);
+      if (verMatch) versions[name] = verMatch[1].trim().split(';')[0].split('#')[0].trim();
+    }
+  });
+  return { ecosystem: 'PyPI', appName: 'python-project', deps: [...new Set(deps)], versions };
 }
 
 function parsePipfile(content) {
@@ -101,22 +105,25 @@ function parsePyprojectToml(content) {
 }
 
 function parsePomXml(content) {
-  // Extract <groupId>...</groupId> and <artifactId>...</artifactId> from <dependency> blocks
   const deps = [];
+  const versions = {};
   const depRegex = /<dependency>\s*([\s\S]*?)<\/dependency>/g;
   let match;
   while ((match = depRegex.exec(content)) !== null) {
     const block = match[1];
     const groupId = (block.match(/<groupId>(.*?)<\/groupId>/) || [])[1];
     const artifactId = (block.match(/<artifactId>(.*?)<\/artifactId>/) || [])[1];
+    const version = (block.match(/<version>(.*?)<\/version>/) || [])[1];
     if (groupId && artifactId) {
-      deps.push(`${groupId}:${artifactId}`);
+      const name = `${groupId}:${artifactId}`;
+      deps.push(name);
+      if (version) versions[name] = version.replace(/\$\{.*?\}/, '').trim();
     } else if (artifactId) {
       deps.push(artifactId);
     }
   }
   const nameMatch = content.match(/<artifactId>(.*?)<\/artifactId>/);
-  return { ecosystem: 'Maven', appName: nameMatch ? nameMatch[1] : 'maven-project', deps: [...new Set(deps)] };
+  return { ecosystem: 'Maven', appName: nameMatch ? nameMatch[1] : 'maven-project', deps: [...new Set(deps)], versions };
 }
 
 function parseBuildGradle(content) {
@@ -609,7 +616,7 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
       });
     }
 
-    const { ecosystem, appName, deps: depNames } = parsed;
+    const { ecosystem, appName, deps: depNames, versions } = parsed;
 
     const nodes = [];
     const edges = [];
@@ -625,7 +632,14 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
     depNames.forEach(dep => {
       nodes.push({ id: dep, name: dep, type: 'package', layer: 1, vuln: 0 });
       edges.push([appName, dep]);
-      queries.push({ package: { name: dep, ecosystem } });
+      
+      const query = { package: { name: dep, ecosystem } };
+      if (versions && versions[dep]) {
+        // Strip semver operators (^, ~, >, <, =) for OSV compatibility
+        const cleanVer = versions[dep].replace(/^[=<>!~^]+/, '');
+        if (cleanVer) query.version = cleanVer;
+      }
+      queries.push(query);
       nodeOrder.push(dep);
     });
 
@@ -975,31 +989,105 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
     console.log(`  Direct vulns: ${directVulnCount}, Transitive vulns: ${transitiveVulnCount}`);
     console.log(`  Smart fixes generated: ${smartFixes.length}`);
 
-    // ========== GENERATE FIXED MANIFEST ==========
+    // ========== GENERATE FIXED MANIFEST (COMPREHENSIVE MULTI-ECOSYSTEM) ==========
     let fixedManifest = null;
-    if (ecosystem === 'npm' && smartFixes.length > 0) {
-      try {
-        const parsedJson = JSON.parse(fileContent);
-        let changed = false;
-        
-        for (const fix of smartFixes) {
-          if (fix.fixVersion) {
-            if (parsedJson.dependencies && parsedJson.dependencies[fix.name]) {
-              parsedJson.dependencies[fix.name] = `^${fix.fixVersion}`;
+    try {
+      // 1. Gather the absolute latest fix versions for every single vulnerable package
+      const packagesToFix = {};
+      for (const pkg in osvDetails) {
+        const vulns = osvDetails[pkg];
+        const fixVersion = vulns.find(v => v.fixVersion)?.fixVersion;
+        if (fixVersion) {
+          packagesToFix[pkg] = fixVersion;
+        }
+      }
+
+      if (Object.keys(packagesToFix).length > 0) {
+        if (ecosystem === 'npm') {
+          // NPM: Use direct version bumps + 'overrides' for transitives
+          const parsedJson = JSON.parse(fileContent);
+          let changed = false;
+          
+          for (const [pkg, fixVer] of Object.entries(packagesToFix)) {
+            let isDirect = false;
+            if (parsedJson.dependencies && parsedJson.dependencies[pkg]) {
+              parsedJson.dependencies[pkg] = `^${fixVer}`;
+              isDirect = true;
               changed = true;
-            } else if (parsedJson.devDependencies && parsedJson.devDependencies[fix.name]) {
-              parsedJson.devDependencies[fix.name] = `^${fix.fixVersion}`;
+            } 
+            if (parsedJson.devDependencies && parsedJson.devDependencies[pkg]) {
+              parsedJson.devDependencies[pkg] = `^${fixVer}`;
+              isDirect = true;
+              changed = true;
+            }
+            
+            // If it's transitive or we just want to be absolutely sure, add to overrides
+            if (!isDirect) {
+              if (!parsedJson.overrides) parsedJson.overrides = {};
+              parsedJson.overrides[pkg] = `^${fixVer}`;
               changed = true;
             }
           }
+          
+          if (changed) fixedManifest = JSON.stringify(parsedJson, null, 2);
+
+        } else if (ecosystem === 'PyPI') {
+          // Python: Update direct, append transitives
+          let lines = fileContent.split(/\r?\n/);
+          let changed = false;
+          let addedTransitiveHeader = false;
+          
+          for (const [pkg, fixVer] of Object.entries(packagesToFix)) {
+            const regex = new RegExp(`^${pkg}(==|>=|<=|>|<|~=).*$`, 'i');
+            let found = false;
+            for (let i = 0; i < lines.length; i++) {
+              if (regex.test(lines[i].trim())) {
+                lines[i] = `${pkg}>=${fixVer} # RippleGuard Auto-Fix`;
+                found = true;
+                changed = true;
+              }
+            }
+            if (!found) {
+              if (!addedTransitiveHeader) {
+                lines.push('\n# RIPPLEGUARD AUTO-FIX: Transitive Dependency Overrides');
+                addedTransitiveHeader = true;
+              }
+              lines.push(`${pkg}>=${fixVer}`);
+              changed = true;
+            }
+          }
+          if (changed) fixedManifest = lines.join('\n');
+
+        } else if (ecosystem === 'Maven') {
+          // Maven: Replace direct tags + inject <dependencyManagement>
+          let patchedXml = fileContent;
+          let mgmtDeps = '';
+          
+          for (const [pkg, fixVer] of Object.entries(packagesToFix)) {
+            const parts = pkg.split(':');
+            if (parts.length === 2) {
+              const groupId = parts[0];
+              const artifactId = parts[1];
+              
+              // Direct replacement attempt
+              const depRegex = new RegExp(`(<groupId>\\s*${groupId}\\s*</groupId>\\s*<artifactId>\\s*${artifactId}\\s*</artifactId>\\s*<version>)([^<]+)(</version>)`, 'g');
+              patchedXml = patchedXml.replace(depRegex, `$1${fixVer}$3`);
+              
+              // Build management block for transitives
+              mgmtDeps += `\n      <dependency>\n        <groupId>${groupId}</groupId>\n        <artifactId>${artifactId}</artifactId>\n        <version>${fixVer}</version>\n      </dependency>`;
+            }
+          }
+          
+          if (mgmtDeps && patchedXml.includes('</project>')) {
+            const mgmtBlock = `\n  <!-- RIPPLEGUARD AUTO-FIX: Enforcing safe versions for transitive vulnerabilities -->\n  <dependencyManagement>\n    <dependencies>${mgmtDeps}\n    </dependencies>\n  </dependencyManagement>\n`;
+            patchedXml = patchedXml.replace('</project>', mgmtBlock + '</project>');
+          }
+          
+          fixedManifest = patchedXml;
         }
-        
-        if (changed) {
-          fixedManifest = JSON.stringify(parsedJson, null, 2);
-        }
-      } catch (err) {
-        console.error("Failed to parse or patch package.json:", err);
       }
+    } catch (err) {
+      console.error("Failed to generate fixed manifest:", err);
     }
 
     // Clean up temp file

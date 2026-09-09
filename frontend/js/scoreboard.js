@@ -18,11 +18,13 @@ function buildScoreboard() {
       <td><span class="legend-dot ${scoreClass}" style="background:${riskColor(m.trueRisk)}; color:${riskColor(m.trueRisk)};"></span></td>
       <td class="pkg-name-cell">${node.name}</td>
       <td style="font-family:'JetBrains Mono',monospace;">${node.vuln}</td>
+      <td style="font-family:'JetBrains Mono',monospace;">${m.sastScore || 0}</td>
+      <td style="font-family:'JetBrains Mono',monospace;">${m.scaScore || 0}</td>
       <td><span class="score-badge ${scoreClass}">${m.trueRisk}</span></td>
       <td style="font-family:'JetBrains Mono',monospace;">${m.directDependents}</td>
       <td style="font-family:'JetBrains Mono',monospace;">${m.affectedAppsCount} / ${TOTAL_APPS}</td>
       <td class="action-pill">${riskLabel(m.trueRisk)}</td>
-      <td><a class="btn-table-simulate" href="propagation.html?node=${node.id}">Taint Analysis →</a></td>
+      <td><a class="btn-table-simulate" href="javascript:void(0)" onclick="simulateLaserPropagation('${node.id}'); window.scrollTo(0,0);">Taint Analysis →</a></td>
     `;
     tbody.appendChild(row);
   });

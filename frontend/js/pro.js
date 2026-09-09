@@ -404,10 +404,13 @@
   }
 
   function typewriterRender(container, lines) {
+    const renderId = Date.now().toString();
+    container.dataset.renderId = renderId;
     container.innerHTML = '';
     container.style.overflowY = 'auto';
     lines.forEach((line, i) => {
       setTimeout(() => {
+        if (container.dataset.renderId !== renderId) return; // Prevent race conditions
         const div = document.createElement('div');
         if (line.isHtml) {
           div.innerHTML = line.text;

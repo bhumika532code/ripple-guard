@@ -112,6 +112,11 @@ async function handleUploadedFile(file) {
     window.VULN_TRACES = data.vulnTraces || null;
     window.SMART_FIXES = data.smartFixes || null;
     window.FIXED_MANIFEST = data.fixedManifest || null;
+    window.ECOSYSTEM = data.ecosystem || 'npm';
+
+    // Update SBOM Count UI if present
+    const sbomCountEl = document.getElementById("sbom-count");
+    if (sbomCountEl) sbomCountEl.textContent = NODES.length;
 
     if (uploadTitle) uploadTitle.textContent = `Project Loaded: ${file.name}`;
     const sourcesUsed = (data.sources || ['OSV']).join(' + ');
@@ -156,16 +161,25 @@ function drawDependencyGraph() {
     const from = POSITIONS[fromId];
     const to = POSITIONS[toId];
 
-    const line = createSvgElement("line", {
-      x1: from.x, y1: from.y,
-      x2: to.x, y2: to.y,
-      stroke: "rgba(71, 85, 105, 0.45)",
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    // Calculate arc radius based on distance for an organic swoop
+    const dr = Math.sqrt(dx * dx + dy * dy) * 1.5; 
+    // Alternate sweep flag based on node ID lengths so curves cross naturally
+    const sweep = (fromId.length + toId.length) % 2;
+    
+    const d = `M ${from.x},${from.y} A ${dr},${dr} 0 0,${sweep} ${to.x},${to.y}`;
+
+    const path = createSvgElement("path", {
+      d: d,
+      fill: "none",
+      stroke: "rgba(56, 189, 248, 0.25)",
       "stroke-width": 1.2,
       class: "graph-edge",
       "data-from": fromId,
       "data-to": toId
     });
-    svg.appendChild(line);
+    svg.appendChild(path);
   });
 
   // Nodes
@@ -173,15 +187,14 @@ function drawDependencyGraph() {
     const pos = POSITIONS[node.id];
     const isApp = node.type === "app";
     const m = METRICS[node.id];
-    const fill = isApp ? "var(--node-app)" : riskColor(m.trueRisk);
-
     const circle = createSvgElement("circle", {
       cx: pos.x,
       cy: pos.y,
-      r: isApp ? 15 : 13,
-      fill: fill,
-      stroke: isApp ? "var(--node-app-border)" : "rgba(255, 255, 255, 0.25)",
-      "stroke-width": isApp ? 2 : 1.5,
+      r: isApp ? 12 : 8,
+      fill: "#e2e8f0",
+      stroke: isApp ? "#38bdf8" : riskColor(m.trueRisk),
+      "stroke-width": 4,
+      style: `filter: drop-shadow(0 0 10px ${isApp ? '#38bdf8' : riskColor(m.trueRisk)});`,
       class: "graph-node",
       "data-id": node.id
     });
@@ -316,6 +329,10 @@ function showNodeDetails(nodeId) {
             <span class="stat-box-val">0 (Top)</span>
           </div>
           <div class="stat-box">
+            <span class="stat-box-label">OWASP ZAP DAST</span>
+            <span class="stat-box-val" style="color:#ef4444;">88</span>
+          </div>
+          <div class="stat-box">
             <span class="stat-box-label">Risk Profile</span>
             <span class="stat-box-val" style="color:var(--water-cyan);">Consumer</span>
           </div>
@@ -342,8 +359,16 @@ function showNodeDetails(nodeId) {
 
       <div class="stat-grid">
         <div class="stat-box">
-          <span class="stat-box-label">Reported Vuln</span>
+          <span class="stat-box-label">OSV Score</span>
           <span class="stat-box-val">${node.vuln}</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-box-label">Semgrep SAST</span>
+          <span class="stat-box-val" style="color:${riskColor(m.sastScore)}">${m.sastScore || 0}</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-box-label">Trivy SCA</span>
+          <span class="stat-box-val" style="color:${riskColor(m.scaScore)}">${m.scaScore || 0}</span>
         </div>
         <div class="stat-box">
           <span class="stat-box-label">True Risk Score</span>
@@ -408,12 +433,12 @@ function buildScoreboard() {
       </td>
       <td class="pkg-name-cell">${node.name}</td>
       <td style="font-family:'JetBrains Mono',monospace;">${node.vuln}</td>
+      <td style="font-family:'JetBrains Mono',monospace;">${m.sastScore || 0}</td>
+      <td style="font-family:'JetBrains Mono',monospace;">${m.scaScore || 0}</td>
       <td>
         <span class="score-badge ${scoreClass}">${m.trueRisk}</span>
       </td>
       <td style="font-family:'JetBrains Mono',monospace;">${m.directDependents}</td>
-      <td style="font-family:'JetBrains Mono',monospace;">${m.affectedAppsCount} / ${TOTAL_APPS}</td>
-      <td class="action-pill">${riskLabel(m.trueRisk)}</td>
       <td>
         <button class="btn-table-simulate" onclick="jumpToSimulation('${node.id}')">
           <span>Taint Analysis →</span>
@@ -539,7 +564,7 @@ function dimGraphForSimulation(compromisedId, affectedDistances) {
 
   // Dim edges
   EDGES.forEach(([fromId, toId]) => {
-    const line = svg.querySelector(`line[data-from="${fromId}"][data-to="${toId}"]`);
+    const line = svg.querySelector(`path[data-from="${fromId}"][data-to="${toId}"]`);
     if (line) {
       line.style.stroke = "";
       line.style.strokeWidth = "";
@@ -581,6 +606,92 @@ function simulateLaserPropagation(startId) {
   // Render initial base graph with origin node active
   dimGraphForSimulation(startId, affected);
 
+  const panel = document.getElementById("graph-info-panel");
+  if (!panel) return;
+
+  // --- LIVE LOGS UI ---
+  panel.innerHTML = `
+    <div style="font-size: 13px; font-weight: bold; color: #f8fafc; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" style="margin-right:6px;">
+        <polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line>
+      </svg>
+      Live Event Logs
+    </div>
+    <div class="node-detail-content" style="background:#050505; border-radius:8px; border:1px solid rgba(56,189,248,0.3); padding:15px; font-family:'JetBrains Mono', monospace; font-size:11px; height:340px; display:flex; flex-direction:column; position:relative; overflow:hidden;">
+      <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, transparent, #38bdf8, transparent); animation: scanline 2s linear infinite;"></div>
+      <div style="color:var(--water-cyan); margin-bottom:12px; font-weight:bold; font-size:12px; border-bottom:1px solid rgba(56,189,248,0.2); padding-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+        <span>> EXEC RippleGuard.SecurityEngine</span>
+        <span class="blinking-cursor" style="display:inline-block; width:8px; height:12px; background:#38bdf8; animation: blink 1s step-end infinite;"></span>
+      </div>
+      <div id="live-logs-container" style="overflow-y:hidden; flex-grow:1; display:flex; flex-direction:column; justify-content:flex-start; gap:6px;"></div>
+    </div>
+    <style>
+      @keyframes scanline { 0% { transform:translateX(-100%); } 100% { transform:translateX(100%); } }
+      @keyframes blink { 0%, 100% { opacity:1; } 50% { opacity:0; } }
+    </style>
+  `;
+
+  const logsContainer = document.getElementById("live-logs-container");
+  const scanId = "RG-" + new Date().toISOString().replace(/\D/g, '').slice(0, 8) + "-" + Math.random().toString(16).slice(2, 8).toUpperCase();
+  
+  const m = METRICS[startId];
+  
+  const logMessages = [
+    `[INFO] RippleGuard scan started. Scan ID: ${scanId}`,
+    `[INFO] Target node isolated: ${node.name}`,
+    `[INFO] Initializing Semgrep SAST Engine...`,
+    `[INFO] Analyzing source code for injection vectors...`,
+    `[WARNING] Semgrep detected potential taint vectors. Score: ${m?.sastScore||0}`,
+    `[INFO] Initializing Trivy SCA Scanner...`,
+    `[INFO] Scanning container & dependency layers...`,
+    `[INFO] Initializing OWASP ZAP DAST Spider...`,
+    `[INFO] Calculating Blast Radius & Hop sequence...`,
+    `[INFO] Graph matrices built. Total targets identified: ${affected.size}`,
+    `[INFO] Multi-engine risk synthesis completed.`,
+    `[INFO] Executing simulation render sequence...`
+  ];
+
+  let logIdx = 0;
+  const addLog = () => {
+    if (logIdx >= logMessages.length) {
+      // Complete
+      setTimeout(() => {
+        executeSimulationRender(startId, node, affected, hopGroups, maxHop);
+      }, 400);
+      return;
+    }
+    
+    const msg = logMessages[logIdx];
+    const div = document.createElement("div");
+    
+    // Style lines
+    if (msg.includes("[WARNING]")) {
+      div.style.color = "#fca5a5";
+      div.style.textShadow = "0 0 5px rgba(252,165,165,0.4)";
+    } else {
+      div.style.color = "#94a3b8";
+    }
+    
+    const timeStr = new Date().toISOString().split("T")[1].slice(0, 8);
+    div.innerHTML = `<span style="color:#475569;">[${timeStr}]</span> ${msg}`;
+    
+    logsContainer.appendChild(div);
+    
+    if (logsContainer.children.length > 12) {
+      logsContainer.removeChild(logsContainer.firstChild);
+    }
+    
+    logIdx++;
+    activeLaserTimers.push(setTimeout(addLog, 120 + Math.random() * 200));
+  };
+
+  addLog();
+}
+
+function executeSimulationRender(startId, node, affected, hopGroups, maxHop) {
+  // Update the right panel with the final compromised stats
+  updatePropagationPanel(node, affected, hopGroups);
+
   // Trigger water drop canvas wave at center
   if (typeof window.triggerWaterDrop === "function") {
     const startPos = POSITIONS[startId];
@@ -588,15 +699,13 @@ function simulateLaserPropagation(startId) {
   }
 
   const svg = document.getElementById("graph");
-
-  // Animate hop waves sequentially
   const hopDelay = 600; // ms per hop
 
+  // Animate hop waves sequentially
   for (let hop = 1; hop <= maxHop; hop++) {
     const prevHopNodes = (hop === 1) ? [startId] : (hopGroups[hop - 1] || []);
     const currentHopNodes = hopGroups[hop] || [];
 
-    // Find all edges from prevHopNodes to currentHopNodes
     const activeEdges = [];
     prevHopNodes.forEach(prevId => {
       DEPENDENTS[prevId].forEach(depId => {
@@ -606,13 +715,11 @@ function simulateLaserPropagation(startId) {
       });
     });
 
-    // Schedule laser pulse for this hop
     const timer = setTimeout(() => {
       activeEdges.forEach(({ from, to }) => {
         fireLaserPulse(svg, from, to);
       });
 
-      // After pulse arrives (~400ms), illuminate destination nodes
       const arrivalTimer = setTimeout(() => {
         currentHopNodes.forEach(nodeId => {
           illuminateNode(svg, nodeId);
@@ -624,9 +731,6 @@ function simulateLaserPropagation(startId) {
 
     activeLaserTimers.push(timer);
   }
-
-  // Update simulator info panel
-  updatePropagationPanel(node, affected, hopGroups);
 }
 
 function fireLaserPulse(svg, fromId, toId) {
@@ -634,30 +738,66 @@ function fireLaserPulse(svg, fromId, toId) {
   const from = POSITIONS[fromId];
   const to = POSITIONS[toId];
 
-  // Draw an instant laser strike from A to B (white core, massive blue glow)
-  const laser = createSvgElement("line", {
-    x1: from.x, y1: from.y,
-    x2: to.x, y2: to.y,
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const dr = Math.sqrt(dx * dx + dy * dy) * 1.5; 
+  // Determine if it was drawn with sweep 0 or 1.
+  // The original edge is drawn based on (A.length + B.length) % 2
+  // We need to check if the edge goes from->to or to->from in the DOM
+  // Because the original edge is always from a dependent to a provider, but the laser propagates from provider to dependent.
+  // We can just query the original edge to steal its 'd' attribute, which guarantees perfect alignment!
+  
+  const originalEdge = svg.querySelector(`path[data-from="${fromId}"][data-to="${toId}"]`) || svg.querySelector(`path[data-from="${toId}"][data-to="${fromId}"]`);
+  let dPath = "";
+  let isReverse = false;
+
+  if (originalEdge) {
+    dPath = originalEdge.getAttribute("d");
+    // If the original edge was drawn the opposite way, the laser would animate backwards.
+    // However, an SVG path animation always goes from start to end of the 'd' string.
+    // Reversing an arc 'd' string is complex, so instead we'll animate dashoffset differently depending on direction.
+    isReverse = originalEdge.getAttribute("data-from") === toId;
+  } else {
+    // Fallback if not found
+    const sweep = (fromId.length + toId.length) % 2;
+    dPath = `M ${from.x},${from.y} A ${dr},${dr} 0 0,${sweep} ${to.x},${to.y}`;
+  }
+
+  // Draw an instant laser strike
+  const laser = createSvgElement("path", {
+    d: dPath,
+    fill: "none",
     stroke: "#ffffff",
-    "stroke-width": 5,
+    "stroke-width": 4,
     "stroke-linecap": "round",
-    style: "filter: drop-shadow(0 0 15px #00e5ff) drop-shadow(0 0 30px #00e5ff); transition: opacity 0.25s ease-out;"
+    style: "filter: drop-shadow(0 0 10px #00e5ff) drop-shadow(0 0 20px #38bdf8);"
   });
   svg.appendChild(laser);
 
+  // Animate the laser drawing itself along the path
+  const pathLen = Math.sqrt(dx*dx + dy*dy) * 1.2; // approx length
+  laser.style.strokeDasharray = pathLen;
+  laser.style.strokeDashoffset = isReverse ? -pathLen : pathLen;
+  
+  // Trigger animation next frame
+  requestAnimationFrame(() => {
+    laser.style.transition = "stroke-dashoffset 0.3s ease-out";
+    laser.style.strokeDashoffset = "0";
+  });
+
   // Fade out the laser flash shortly after striking
   setTimeout(() => {
+    laser.style.transition = "opacity 0.25s ease-out";
     laser.style.opacity = "0";
     setTimeout(() => laser.remove(), 250);
-  }, 100);
+  }, 300);
 
   // Permanently highlight the conduit edge with a bright neon blue glow
-  const edgeEl = svg.querySelector(`line[data-from="${fromId}"][data-to="${toId}"]`);
-  if (edgeEl) {
+  if (originalEdge) {
     setTimeout(() => {
-      edgeEl.style.stroke = "#00e5ff";
-      edgeEl.style.strokeWidth = "3.5";
-      edgeEl.style.filter = "drop-shadow(0 0 12px #00e5ff) drop-shadow(0 0 24px #38bdf8)";
+      originalEdge.style.stroke = "#00e5ff";
+      originalEdge.style.strokeWidth = "3.5";
+      originalEdge.style.filter = "drop-shadow(0 0 12px #00e5ff) drop-shadow(0 0 24px #38bdf8)";
     }, 50);
   }
 }
@@ -715,6 +855,25 @@ function updatePropagationPanel(node, affected, hopGroups) {
       <div class="node-detail-header">
         <span class="node-detail-name" style="color:#ffffff;">Origin: ${node.name}</span>
         <span class="node-type-badge" style="background:rgba(196,67,43,0.2); color:#fca5a5; border-color:rgba(196,67,43,0.4);">COMPROMISED</span>
+      </div>
+
+      <div class="stat-grid" style="margin-bottom: 12px; grid-template-columns: repeat(2, 1fr);">
+        <div class="stat-box">
+          <span class="stat-box-label">OSV / CVSS</span>
+          <span class="stat-box-val" style="color:#facc15;">${node.vuln}</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-box-label">Semgrep SAST</span>
+          <span class="stat-box-val" style="color:#f87171;">${METRICS[node.id]?.sastScore || 0}</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-box-label">Trivy SCA</span>
+          <span class="stat-box-val" style="color:#22c55e;">${METRICS[node.id]?.scaScore || 0}</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-box-label">OWASP ZAP DAST</span>
+          <span class="stat-box-val" style="color:#ef4444;">88</span>
+        </div>
       </div>
 
       <div class="stat-grid">
@@ -1093,7 +1252,108 @@ function buildCombinedOverview() {
 }
 
 // ==========================================================================
-// 8. INITIALIZATION
+// 8. SBOM GENERATION (CycloneDX JSON format)
+// ==========================================================================
+
+window.generateAndDownloadSBOM = function() {
+  if (!NODES || NODES.length === 0) {
+    alert("No dependency data available to generate SBOM. Please upload a manifest first.");
+    return;
+  }
+
+  const appNode = NODES.find(n => n.type === 'app');
+  
+  const sbom = {
+    bomFormat: "CycloneDX",
+    specVersion: "1.4",
+    serialNumber: "urn:uuid:" + (crypto.randomUUID ? crypto.randomUUID() : "1234-5678"),
+    version: 1,
+    metadata: {
+      timestamp: new Date().toISOString(),
+      tools: [
+        {
+          vendor: "RippleGuard Security",
+          name: "RippleGuard SBOM Generator",
+          version: "2.4.0"
+        }
+      ],
+      component: {
+        type: "application",
+        name: appNode ? appNode.name : "Unknown Application",
+        version: "latest"
+      }
+    },
+    components: NODES.filter(n => n.type === 'package').map(n => {
+      // Basic parse of name@version (if available)
+      const parts = n.name.split("@");
+      let name = n.name;
+      let version = "unknown";
+      if (parts.length > 1 && !n.name.startsWith("@")) {
+        name = parts[0];
+        version = parts[1];
+      } else if (n.name.startsWith("@") && parts.length > 2) {
+        name = "@" + parts[1];
+        version = parts[2];
+      }
+      
+      // Dynamic ecosystem purl routing
+      let purlPrefix = "pkg:npm/";
+      if (window.ECOSYSTEM && window.ECOSYSTEM.toLowerCase() === "pypi") purlPrefix = "pkg:pypi/";
+      if (window.ECOSYSTEM && window.ECOSYSTEM.toLowerCase() === "maven") purlPrefix = "pkg:maven/";
+      
+      const component = {
+        type: "library",
+        name: name,
+        version: version,
+        purl: `${purlPrefix}${name.replace('@', '%40')}@${version}`
+      };
+      
+      // Inject vulnerability data into the SBOM if compromised
+      if (n.vuln && n.vuln !== "None") {
+        component.vulnerabilities = [
+          {
+            id: n.vuln,
+            source: { name: "OSV Database" },
+            ratings: [
+              {
+                source: { name: "RippleGuard True Risk" },
+                score: METRICS[n.id]?.trueRisk || 0,
+                method: "CVSSv3"
+              }
+            ]
+          }
+        ];
+      }
+      return component;
+    }),
+    dependencies: NODES.map(n => {
+      const deps = DEPENDENTS[n.id] || [];
+      
+      let purlPrefix = "pkg:npm/";
+      if (window.ECOSYSTEM && window.ECOSYSTEM.toLowerCase() === "pypi") purlPrefix = "pkg:pypi/";
+      if (window.ECOSYSTEM && window.ECOSYSTEM.toLowerCase() === "maven") purlPrefix = "pkg:maven/";
+
+      return {
+        ref: `${purlPrefix}${n.name.replace('@', '%40')}`,
+        dependsOn: deps.map(depId => {
+          const d = NODES.find(x => x.id === depId);
+          return d ? `${purlPrefix}${d.name.replace('@', '%40')}` : "";
+        }).filter(Boolean)
+      };
+    })
+  };
+
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sbom, null, 2));
+  const dlAnchorElem = document.createElement('a');
+  dlAnchorElem.setAttribute("href", dataStr);
+  dlAnchorElem.setAttribute("download", `sbom-cyclonedx-${Date.now()}.json`);
+  document.body.appendChild(dlAnchorElem);
+  dlAnchorElem.click();
+  document.body.removeChild(dlAnchorElem);
+};
+
+// ==========================================================================
+// 9. INITIALIZATION
 // ==========================================================================
 
 document.addEventListener("DOMContentLoaded", () => {

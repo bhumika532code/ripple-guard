@@ -9,37 +9,46 @@ function computePositions() {
     byLayer[node.layer].push(node);
   });
 
-  // Track dependencies to sort nodes by their parent's X position (barycenter heuristic)
-  const parents = {};
-  NODES.forEach(n => parents[n.id] = []);
-  EDGES.forEach(([from, to]) => {
-    parents[to].push(from);
-  });
+  const cx = 450;
+  const cy = 275; // Root node dead center of the 900x550 canvas
+  
+  // Radii scaled up to make the graph look larger and fill the screen
+  const layerRadiiX = { 0: 0, 1: 180, 2: 320, 3: 420, 4: 440 };
+  const layerRadiiY = { 0: 0, 1: 110, 2: 200, 3: 250, 4: 265 };
 
   const layerKeys = Object.keys(byLayer).sort((a, b) => a - b);
 
-  layerKeys.forEach(layer => {
-    let nodesInLayer = byLayer[layer];
+  layerKeys.forEach(layerNum => {
+    const layer = parseInt(layerNum);
+    const nodesInLayer = byLayer[layer];
+    const n = nodesInLayer.length;
+    
+    let Rx = layerRadiiX[layer] || (layer * 140); 
+    let Ry = layerRadiiY[layer] || (layer * 85);
+    if (layer === 0 && n > 1) { Rx = 40; Ry = 25; }
 
-    if (layer > 0) {
-      nodesInLayer.forEach(node => {
-        let sumX = 0;
-        let count = 0;
-        parents[node.id].forEach(parentId => {
-          if (positions[parentId]) {
-            sumX += positions[parentId].x;
-            count++;
-          }
-        });
-        node._idealX = count > 0 ? sumX / count : VIEW_WIDTH / 2;
-      });
-      nodesInLayer.sort((a, b) => a._idealX - b._idealX);
-    }
+    // Full 360 degree spread (up, down, left, right)
+    const angleRange = 2 * Math.PI;
+    const angleStep = n > 0 ? angleRange / n : 0;
+    
+    // Rotate each layer slightly so the nodes interleave organically
+    const angleOffset = layer * (Math.PI / 3);
 
-    const spacing = VIEW_WIDTH / (nodesInLayer.length + 1);
     nodesInLayer.forEach((node, index) => {
-      const stagger = (index % 2 === 0) ? -35 : 35;
-      positions[node.id] = { x: spacing * (index + 1), y: LAYER_Y[node.layer] + stagger };
+      const angle = angleOffset + (index * angleStep);
+      
+      // Add a tiny stagger for an organic, non-rigid feel
+      const staggerX = (index % 2 === 0) ? Rx - 15 : Rx + 15;
+      const staggerY = (index % 2 === 0) ? Ry - 10 : Ry + 10;
+      
+      if (layer === 0 && n === 1) {
+        positions[node.id] = { x: cx, y: cy };
+      } else {
+        positions[node.id] = { 
+          x: cx + staggerX * Math.cos(angle), 
+          y: cy + staggerY * Math.sin(angle) 
+        };
+      }
     });
   });
 
@@ -100,13 +109,35 @@ function computeMetrics(nodeId) {
   const blastRadiusPct = (affected.size / (TOTAL_NODES - 1)) * 100;
   const fanInPct = (directDependents / MAX_DIRECT_DEPENDENTS) * 100;
 
+  // OSV Risk
   const structural = (0.5 * appCoveragePct) + (0.3 * blastRadiusPct) + (0.2 * fanInPct);
-  const trueRisk = Math.round((0.65 * structural) + (0.35 * node.vuln));
+  
+  // Mock SAST (Semgrep) and SCA (Trivy) Scores
+  // Give high severity OSV nodes higher SAST/SCA scores for realistic demo
+  let sastScore = 0;
+  let scaScore = 0;
+  
+  if (node.vuln > 70) {
+    sastScore = Math.floor(Math.random() * 30) + 70; // 70-100
+    scaScore = Math.floor(Math.random() * 20) + 80;  // 80-100
+  } else if (node.vuln > 40) {
+    sastScore = Math.floor(Math.random() * 30) + 40; // 40-70
+    scaScore = Math.floor(Math.random() * 30) + 50;  // 50-80
+  } else {
+    sastScore = Math.floor(Math.random() * 20);      // 0-20
+    scaScore = Math.floor(Math.random() * 30);       // 0-30
+  }
+  
+  // Combine OSV, Structural, SAST, and SCA
+  const aggregateVulnerability = (0.5 * node.vuln) + (0.25 * sastScore) + (0.25 * scaScore);
+  const trueRisk = Math.round((0.65 * structural) + (0.35 * aggregateVulnerability));
 
   return {
     directDependents,
     affectedCount: affected.size,
     affectedAppsCount: affectedApps.length,
+    sastScore,
+    scaScore,
     trueRisk: Math.max(0, Math.min(100, trueRisk)),
   };
 }

@@ -57,7 +57,7 @@ function drawGraph() {
 
     if (isOrigin) {
       fill = "#ffffff";
-      stroke = "var(--water-cyan-bright)";
+      stroke = "var(--web-cyan-bright)";
 
       const aura = createSvgElement("circle", {
         cx: pos.x, cy: pos.y, r: 16, class: "pulse-origin-aura"
@@ -139,7 +139,7 @@ function updateInfoPanel() {
   Object.keys(waveMap).sort((a, b) => a - b).forEach(hop => {
     const names = waveMap[hop].map(id => {
       const n = NODES.find(item => item.id === id);
-      return `<span style="${n.type === 'app' ? 'color:var(--water-cyan);font-weight:700;' : ''}">${n.name}</span>`;
+      return `<span style="${n.type === 'app' ? 'color:var(--web-cyan);font-weight:700;' : ''}">${n.name}</span>`;
     });
     wavesHtml += `
       <div class="hop-item-card">

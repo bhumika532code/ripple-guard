@@ -1,5 +1,5 @@
 /**
- * RIPPLE GUARD — Cinematic Top-View Droplet Splash Controller
+ * RIPPLE GUARD — Cinematic Spider Web Splash Controller
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -21,14 +21,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 850);
   }
 
-  // Trigger impact water ripple wave at exact contact time (approx 1.15s)
+  // Trigger web pulse
   setTimeout(() => {
-    if (!completed && typeof window.triggerWaterDrop === "function") {
-      window.triggerWaterDrop(window.innerWidth / 2, window.innerHeight / 2, 0.95);
+    if (!completed && typeof window.triggerWebPulse === "function") {
+      window.triggerWebPulse(window.innerWidth / 2, window.innerHeight / 2, 0.95);
     }
   }, 1150);
 
-  // Transition to main site as transparent ripples expand across screen (2.35s)
+  // Transition to main site
   setTimeout(finishSplash, 2350);
 
   // User click or keypress allows instant skip if desired

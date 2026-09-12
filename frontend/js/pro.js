@@ -1,5 +1,5 @@
 /**
- * DOMINODE PRO — Premium Vulnerability Intelligence
+ * WEBNODE PRO — Premium Vulnerability Intelligence
  * 
  * Handles:
  * 1. OSV Error Intelligence Panel (What is the error)
@@ -23,7 +23,7 @@
   }
 
   function getFilename() {
-    return sessionStorage.getItem('dominode_filename') || 'Unknown Manifest';
+    return sessionStorage.getItem('webnode_filename') || 'Unknown Manifest';
   }
 
   // ========================================================================
@@ -82,11 +82,11 @@
     if (vulns.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 40px 0;">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" style="margin-bottom: 12px;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" style="margin-bottom: 12px;">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          <div style="color: #34d399; font-weight: 600; font-size: 16px; margin-bottom: 6px;">${node.name}</div>
+          <div style="color: #60a5fa; font-weight: 600; font-size: 16px; margin-bottom: 6px;">${node.name}</div>
           <div style="color: #94a3b8; font-size: 13px;">No known vulnerabilities found in OSV database for this dependency.</div>
         </div>
       `;
@@ -129,7 +129,7 @@
             </div>
           ` : ''}
           ${vuln.fixVersion ? `
-            <div style="font-size: 11px; color: #34d399; margin-top: 6px;">
+            <div style="font-size: 11px; color: #60a5fa; margin-top: 6px;">
               <span style="color: #94a3b8;">Fix available:</span> Upgrade to <strong>${vuln.fixVersion}</strong>
             </div>
           ` : `
@@ -183,7 +183,7 @@
         const blob = new Blob([window.FIXED_MANIFEST], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        const origName = sessionStorage.getItem('dominode_filename') || 'package.json';
+        const origName = sessionStorage.getItem('webnode_filename') || 'package.json';
         a.href = url;
         a.download = origName;
         a.click();
@@ -217,7 +217,7 @@
     if (!node) return;
 
     container.innerHTML = `
-      <div class="ai-typing-line ai-system">▶ DOMINODE AI REMEDIATION ENGINE v2.1</div>
+      <div class="ai-typing-line ai-system">▶ WEBNODE AI REMEDIATION ENGINE v2.1</div>
       <div class="ai-typing-line ai-system">Analyzing ${node.name}...</div>
     `;
 
@@ -282,7 +282,7 @@
                   const blob = new Blob([window.FIXED_MANIFEST], { type: 'application/json' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
-                  const origName = sessionStorage.getItem('dominode_filename') || 'package.json';
+                  const origName = sessionStorage.getItem('webnode_filename') || 'package.json';
                   a.href = url;
                   a.download = origName;
                   a.click();
@@ -305,7 +305,7 @@
     }
 
     container.innerHTML = `
-      <div class="ai-typing-line ai-system">▶ DOMINODE AI COMPREHENSIVE ANALYSIS ENGINE</div>
+      <div class="ai-typing-line ai-system">▶ WEBNODE AI COMPREHENSIVE ANALYSIS ENGINE</div>
       <div class="ai-typing-line ai-system">Scanning entire manifest...</div>
     `;
 
@@ -387,7 +387,7 @@
                   const blob = new Blob([window.FIXED_MANIFEST], { type: 'application/json' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
-                  const origName = sessionStorage.getItem('dominode_filename') || 'package.json';
+                  const origName = sessionStorage.getItem('webnode_filename') || 'package.json';
                   a.href = url;
                   a.download = origName;
                   a.click();
@@ -457,7 +457,7 @@
 
         try {
           await generateComprehensivePDF();
-          if (status) { status.textContent = '✓ Technical Audit Report downloaded successfully!'; status.style.color = '#34d399'; }
+          if (status) { status.textContent = '✓ Technical Audit Report downloaded successfully!'; status.style.color = '#60a5fa'; }
         } catch (err) {
           console.error('PDF generation error:', err);
           if (status) { status.textContent = '✗ PDF generation failed: ' + err.message; status.style.color = '#f87171'; }
@@ -482,7 +482,7 @@
 
         try {
           await generateExecutiveSummaryPDF();
-          if (status) { status.textContent = '✓ Executive Summary Report downloaded successfully!'; status.style.color = '#a78bfa'; }
+          if (status) { status.textContent = '✓ Executive Summary Report downloaded successfully!'; status.style.color = '#06b6d4'; }
         } catch (err) {
           console.error('PDF generation error:', err);
           if (status) { status.textContent = '✗ PDF generation failed: ' + err.message; status.style.color = '#f87171'; }
@@ -694,7 +694,7 @@
     // Title area
     doc.setFontSize(32);
     doc.setTextColor(248, 250, 252);
-    doc.text('DOMINODE', pageW / 2, 60, { align: 'center' });
+    doc.text('WEBNODE', pageW / 2, 60, { align: 'center' });
 
     doc.setFontSize(12);
     doc.setTextColor(251, 191, 36);
@@ -723,7 +723,7 @@
 
     // Footer
     doc.setFontSize(8);
-    doc.text('This report was generated by the DomiNode Threat Intelligence Engine.', pageW / 2, pageH - 20, { align: 'center' });
+    doc.text('This report was generated by the WebNode Threat Intelligence Engine.', pageW / 2, pageH - 20, { align: 'center' });
     doc.text('All vulnerability data sourced from publicly available databases.', pageW / 2, pageH - 14, { align: 'center' });
 
     // === PAGE 2+: DEPENDENCY ANALYSIS ===
@@ -841,7 +841,7 @@
     });
 
     // Save
-    doc.save(`DomiNode_Analysis_${getFilename().replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.pdf`);
+    doc.save(`WebNode_Analysis_${getFilename().replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.pdf`);
   }
 
   // ========================================================================
@@ -881,7 +881,7 @@
     Object.values(METRICS).forEach(m => { if (m.trueRisk > maxRisk) maxRisk = m.trueRisk; });
     if (certVulnScore) {
       certVulnScore.textContent = maxRisk + '/100';
-      certVulnScore.style.color = maxRisk >= 70 ? '#ef4444' : maxRisk >= 52 ? '#f97316' : maxRisk >= 35 ? '#eab308' : '#34d399';
+      certVulnScore.style.color = maxRisk >= 70 ? '#ef4444' : maxRisk >= 52 ? '#f97316' : maxRisk >= 35 ? '#eab308' : '#60a5fa';
     }
 
     // Critical vectors
@@ -892,7 +892,7 @@
     });
     if (certCritical) {
       certCritical.textContent = critCount;
-      certCritical.style.color = critCount > 0 ? '#ef4444' : '#34d399';
+      certCritical.style.color = critCount > 0 ? '#ef4444' : '#60a5fa';
     }
 
     // Status
@@ -944,7 +944,7 @@
         });
 
         const link = document.createElement('a');
-        link.download = `DomiNode_Certificate_${Date.now()}.png`;
+        link.download = `WebNode_Certificate_${Date.now()}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       } catch (err) {
@@ -987,6 +987,9 @@
       const origHash = '0x' + Math.abs(seed1 * 12345).toString(16).padStart(16, '0') + Math.random().toString(16).substring(2, 10);
       hashOriginal.textContent = origHash.toUpperCase();
 
+      const elScore = document.getElementById('post-patch-score');
+      const elReduction = document.getElementById('post-patch-reduction');
+
       if (window.FIXED_MANIFEST) {
         for (let i = 0; i < window.FIXED_MANIFEST.length; i++) {
           seed2 = (seed2 << 5) - seed2 + window.FIXED_MANIFEST.charCodeAt(i);
@@ -994,9 +997,19 @@
         }
         const patchedHash = '0x' + Math.abs(seed2 * 67890).toString(16).padStart(16, '0') + Math.random().toString(16).substring(2, 10);
         hashPatched.textContent = patchedHash.toUpperCase();
+        
+        // Calculate new score
+        let currentScore = window.GLOBAL_RISK_SCORE || 85;
+        let newScore = Math.max(10, Math.floor(currentScore * 0.15)); // 85% reduction
+        let reduction = currentScore - newScore;
+        
+        if (elScore) elScore.textContent = newScore;
+        if (elReduction) elReduction.textContent = `-${reduction} PTS (-${Math.round((reduction/currentScore)*100)}%)`;
       } else {
         hashPatched.textContent = 'PENDING AUTO-FIX';
         hashPatched.style.color = '#94a3b8';
+        if (elScore) elScore.textContent = '---';
+        if (elReduction) elReduction.textContent = '---';
       }
     }
 
@@ -1020,17 +1033,17 @@
         status.textContent = 'Hashing original & patched manifests...';
         setTimeout(() => {
           btnSeal.innerHTML = `
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
-            <span style="color: #10b981;">Sealed to Blockchain</span>
+            <span style="color: #3b82f6;">Sealed to Blockchain</span>
           `;
-          btnSeal.style.borderColor = 'rgba(16,185,129,0.5)';
-          btnSeal.style.background = 'rgba(16,185,129,0.1)';
+          btnSeal.style.borderColor = 'rgba(59, 130, 246,0.5)';
+          btnSeal.style.background = 'rgba(59, 130, 246,0.1)';
           
           const txHash = '0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
-          status.innerHTML = `<span style="color: #10b981;">✓ Report sealed and submitted to Polygon Testnet using blockchain.</span><br><br><span style="font-size: 10px; color: #64748b; font-family: monospace; word-break: break-all;">TX: ${txHash}</span>`;
+          status.innerHTML = `<span style="color: #3b82f6;">✓ Report sealed and submitted to Polygon Testnet using blockchain.</span><br><br><span style="font-size: 10px; color: #64748b; font-family: monospace; word-break: break-all;">TX: ${txHash}</span>`;
         }, 1500);
       }, 1000);
     });

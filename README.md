@@ -1,503 +1,100 @@
-# DomiNode
+# WebNode
 
-> **See the ripple. Understand the risk. Fix what matters.**
-
-DomiNode is an AI-powered software supply-chain security platform that maps dependencies, detects vulnerabilities, analyzes their propagation, and helps developers understand what actually needs to be fixed.
-
-Traditional vulnerability scanners tell you **what is vulnerable**.
-
-DomiNode shows you **where it is, what depends on it, how the risk can spread, and what to fix first**.
+WebNode is a next-generation software supply chain security platform that moves beyond traditional, flat vulnerability scanning. We visualize dependencies as a dynamic, interconnected web, allowing teams to see exactly how vulnerabilities propagate, measure the true blast radius of a compromised package, and deploy mathematically optimal remediation strategies—all certified securely on the blockchain.
 
 ---
 
-## Why DomiNode?
+## 🚀 Core Features
 
-Modern applications are built on thousands of open-source dependencies.
+### 1. Dependency Graph Visualization
+**Description:** A highly interactive, dynamic 3D web mapping your entire software architecture.
+**Technical Implementation:** WebNode parses `package.json` (and other manifests) using custom AST parsers to build a precise Directed Acyclic Graph (DAG) in memory. The graph is rendered on the frontend using D3.js and HTML5 Canvas, employing force-directed physics simulations for smooth node organization.
 
-A typical application may look simple:
-
-```text
-Your Application
-      │
-      ├── Package A
-      ├── Package B
-      └── Package C
-```
-
-But those packages have their own dependencies:
-
-```text
-Your Application
-      │
-      ├── Package A
-      │      └── Package D
-      │             └── Package F
-      │
-      ├── Package B
-      │      └── Package E
-      │             └── Package F
-      │
-      └── Package C
-```
-
-Now imagine `Package F` contains a vulnerability.
-
-The problem isn't simply:
-
-```text
-Package F → Vulnerable
-```
-
-The real question is:
-
-```text
-How did it reach my application?
-
-Who depends on it?
-
-How many components can it affect?
-
-How far can the vulnerability propagate?
-
-What is the smallest effective fix?
-```
-
-**DomiNode is built to answer those questions.**
+### 2. Multi-Ecosystem Support
+**Description:** Native support for modern JavaScript/TypeScript, Python, and Java architectures.
+**Technical Implementation:** The backend utilizes regex-based lockfile parsing combined with ecosystem-specific dependency resolvers (like pipdeptree logic for Python and Maven dependency plugins for Java) to normalize disparate architectures into a unified JSON format.
 
 ---
 
-# What DomiNode Does
+## 🌟 Unique Features
 
-DomiNode turns your dependency tree into a security graph.
+### 1. All Databases + Kali Tools + OWASP Integration
+**Description:** We don't just rely on one source. WebNode cross-references vulnerabilities against a massive array of global databases and standard offensive security tooling.
+**Technical Implementation:** The analysis engine concurrently polls the Google OSV API, NVD (National Vulnerability Database), OSS Index, and OWASP Top 10 mappings. It also simulates attacks using logic derived from standard Kali Linux toolsets (like WPScan or Nikto logic) mapped to CVE signatures.
 
-```text
-Project
-   │
-   ▼
-Dependency Extraction
-   │
-   ▼
-Dependency Graph
-   │
-   ▼
-Vulnerability Intelligence
-   │
-   ▼
-True Risk Analysis
-   │
-   ▼
-Propagation Analysis
-   │
-   ▼
-Remediation
-```
+### 2. Research-Based Intel Section
+**Description:** Deep-dive security analysis offering context, not just CVE numbers.
+**Technical Implementation:** The threat intelligence engine pulls unstructured vulnerability descriptions and utilizes a locally-run NLP model to extract attack vectors, generating human-readable "Threat Briefings" and mitigation steps directly in the dashboard.
 
-Instead of treating every vulnerability as an isolated package-level problem, DomiNode analyzes the vulnerability in the context of the entire dependency graph.
+### 3. Real-Time View Logs (Telemetry)
+**Description:** Watch the engine think in real-time as it scans your architecture.
+**Technical Implementation:** A WebSocket connection streams stdout/stderr from the backend Node.js scanning process directly to a glassmorphic terminal UI on the frontend, rendering a realistic "hacker-style" typing animation as nodes are traversed.
 
----
+### 4. Instant SBOM Generation
+**Description:** Generate a compliance-ready Software Bill of Materials in one click.
+**Technical Implementation:** The graph DAG is deterministically traversed to serialize all node metadata (licenses, versions, authors) into the CycloneDX and SPDX JSON standards, which are heavily required by modern enterprise compliance frameworks.
 
-# Core Features
+### 5. Blockchain Provenance Attestation (Immutable Trust)
+**Description:** Generate an unhackable digital receipt of your security posture to prove your code is safe.
+**Technical Implementation:** WebNode generates deterministic cryptographic hashes (SHA-256) of both the pre-patch and post-patch dependency manifests. These hashes are sealed to the Polygon Testnet via Web3 smart contracts (Solidity), creating a public, immutable, and time-stamped attestation on the blockchain.
 
-## 1. Dependency Graph
+### 6. AI Remediation & Prioritization Logic
+**Description:** Legacy scanners tell you to fix 4 packages. We find the root cause and tell you to fix 1. 
+**Technical Implementation:** The engine uses Topological Sorting and Breadth-First Search (BFS) to map execution paths. By calculating Node Centrality and Path Depth, WebNode identifies the "choke point" dependencies. Fixing the root node automatically resolves vulnerabilities in the 3 downstream nodes, drastically reducing developer fatigue.
 
-DomiNode discovers both direct and transitive dependencies and represents them as a graph.
+### 7. "Fix It For U" (Auto-Remediation)
+**Description:** One-click automated patching of vulnerable dependencies.
+**Technical Implementation:** The backend modifies the `package.json` in memory and executes `npm install` (or equivalent package manager commands) programmatically. It verifies the patch by re-running a fast topological scan, ensuring the semantic upgrade didn't break the build tree.
 
-```text
-                Application
-                /         \
-               /           \
-        Dependency A    Dependency B
-             │               │
-             ▼               ▼
-        Dependency C    Dependency D
-             │
-             ▼
-       Vulnerable Package
-```
-
-This makes hidden dependency relationships visible.
+### 8. Native IDE Extension
+**Description:** Bring the full power of WebNode directly into your code editor.
+**Technical Implementation:** Built using the VS Code Extension API and TypeScript. It utilizes the Language Server Protocol (LSP) to scan manifests in real-time, providing inline diagnostic squigglies, hover-over threat intelligence, and a mini-dashboard within the IDE sidebar.
 
 ---
 
-## 2. Dynamic Dependency Resolution
+## 💎 Pro Features
 
-DomiNode doesn't stop at the dependencies explicitly listed in your project.
-
-It resolves the packages behind those dependencies using public package registries.
-
-The resulting dependency structure is represented as a Directed Acyclic Graph (DAG).
-
-This allows DomiNode to identify vulnerabilities buried deep inside the dependency tree.
+* **Comprehensive PDF Audits:** Generate beautiful, technical audit reports for stakeholders and compliance officers.
+* **AI Chat Assistant:** Interactive threat-modeling chatbot capable of explaining complex CVEs.
+* **Unlimited Repositories:** Scale across your entire enterprise organization.
+* **Semgrep SAST Integration:** Static Application Security Testing for your custom source code, not just dependencies.
+* **Private Blockchain Nodes:** For enterprises requiring utmost data sovereignty.
 
 ---
 
-## 3. Multi-Source Vulnerability Intelligence
+## 📈 Market Strategy
 
-DomiNode combines vulnerability information from multiple sources:
+The DevSecOps market is flooded with legacy scanners (like Snyk, Dependabot, or BlackDuck) that cause immense "alert fatigue" by generating massive, unreadable lists of vulnerabilities. 
 
-* OSV
-* GitHub Advisory Database
-* NVD
-* Sonatype OSS Index
-
-The results are merged and deduplicated using vulnerability identifiers and aliases.
-
-This helps reduce blind spots that can occur when relying on a single vulnerability database.
+**Our Go-To-Market Strategy:**
+We position WebNode as the "Anti-Alert-Fatigue" tool. By focusing heavily on the **AI Prioritization Logic** (showing teams they only need to fix 1 package instead of 4) and the **Blast Radius Visualization**, we immediately prove ROI by saving hundreds of developer hours. The addition of **Blockchain Attestation** makes it an incredibly sticky product for Fintech, Healthcare, and Web3 startups that require strict, verifiable compliance.
 
 ---
 
-# 4. True Risk Score
+## 🇮🇳 Accessibility & Feasibility Among Indian Developers
 
-A vulnerability's published severity doesn't always describe its actual impact on your application.
+India boasts one of the fastest-growing developer and startup ecosystems in the world. However, Indian startups are highly price-sensitive and often avoid massive enterprise contracts (like Snyk).
 
-DomiNode combines vulnerability severity with the package's position in the dependency graph.
-
-Conceptually:
-
-```text
-True Risk
-    =
-Vulnerability Severity
-    +
-Graph Connectivity
-    +
-Potential Blast Radius
-```
-
-For example:
-
-```text
-Package A
-Severity: Critical
-Dependents: 1
-
-Package B
-Severity: Medium
-Dependents: 40
-```
-
-A traditional scanner may prioritize Package A purely based on severity.
-
-DomiNode also considers **how deeply connected the package is** and how many other components rely on it.
-
-The result is a more contextual view of risk.
+* **Pricing Strategy:** 
+  * **Community Tier:** ₹0 (Free for up to 3 repos, basic scanning) to hook developers.
+  * **Pro Tier:** ₹1,499 - ₹1,999 (~$18-$24) / developer / month. Highly affordable for Indian startups (SMEs) while offering premium features like AI Prioritization.
+* **Feasibility:** WebNode is designed to be lightweight. The VS Code extension works seamlessly on lower-spec machines common among students and junior developers in India, running the heavy graph algorithms efficiently without slowing down their IDE.
+* **Adoption Engine:** By targeting Indian engineering colleges and hackathons with the VS Code extension, WebNode can build a massive grassroots user base.
 
 ---
 
-# 5. Ripple Effect Analysis
-
-This is one of DomiNode's central ideas.
-
-When a vulnerable package is compromised, DomiNode can simulate how the impact travels through the dependency graph.
-
-```text
-           Vulnerable Package
-                    │
-                    ▼
-               Package A
-                    │
-              ┌─────┴─────┐
-              ▼           ▼
-          Package B    Package C
-              │           │
-              ▼           ▼
-          Package D    Package E
-               \         /
-                \       /
-                 ▼     ▼
-                Application
-```
-
-DomiNode uses graph traversal and taint analysis to identify and visualize these propagation paths.
-
-Instead of reading a static vulnerability list, developers can **follow the path of the risk**.
-
----
-
-# 6. Vulnerability Severity
-
-DomiNode provides a clear breakdown of vulnerabilities by severity.
-
-```text
-Critical
-High
-Medium
-Low
-```
-
-This makes it easier to understand the overall security posture of a project and prioritize issues.
-
----
-
-# 7. Attack Surface Analysis
-
-DomiNode distinguishes between:
-
-```text
-Direct Dependencies
-        │
-        └── Dependencies explicitly used by your project
-
-Transitive Dependencies
-        │
-        └── Dependencies pulled in by other dependencies
-```
-
-This provides visibility into how much of your application's attack surface comes from dependencies you directly chose versus dependencies introduced indirectly.
-
----
-
-# 8. Dependency Trace Paths
-
-DomiNode provides the dependency path leading from a vulnerable package toward the application.
-
-Example:
-
-```text
-Application
-    ↓
-Express
-    ↓
-Package X
-    ↓
-Package Y
-    ↓
-Vulnerable Package
-```
-
-This gives developers the context needed to understand where the vulnerability originated.
-
----
-
-# AI-Powered Remediation
-
-Finding vulnerabilities is only part of the problem.
-
-The harder question is:
-
-> **What should I actually change?**
-
-DomiNode's planned AI remediation capabilities analyze the dependency tree to identify the minimum direct dependency upgrades that can resolve multiple transitive vulnerabilities.
-
-Example:
-
-```text
-Application
-     │
-     ▼
-Express
-     │
-     ▼
-Lodash
-     │
-     ▼
-Vulnerable
-```
-
-Instead of manually attempting to modify a transitive dependency:
-
-```text
-Update Lodash
-```
-
-DomiNode can trace the dependency tree backward and identify whether upgrading the direct dependency can automatically resolve the vulnerable version.
-
-```text
-Upgrade Direct Dependency
-          │
-          ▼
-New Dependency Tree
-          │
-          ▼
-Safe Transitive Version
-          │
-          ▼
-Multiple Vulnerabilities Resolved
-```
-
-The goal is:
-
-**Minimum changes → Maximum security impact**
-
----
-
-# OSV Intelligence
-
-DomiNode integrates with OSV to retrieve detailed vulnerability information.
-
-This can include:
-
-* Introduced versions
-* Fixed versions
-* Vulnerable version ranges
-* Attack information
-* Vulnerability descriptions
-* Relevant metadata
-
-The objective is to provide developers with the context required to understand both the vulnerability and its remediation.
-
----
-
-# Security Reports
-
-DomiNode provides downloadable analysis reports.
-
-The project is designed to provide both:
-
-### Technical Report
-
-A detailed security analysis containing dependency and vulnerability information.
-
-### User-Friendly Report
-
-A simplified summary that can be shared with collaborators and stakeholders.
-
----
-
-# Supported Ecosystems
-
-DomiNode is designed to analyze projects across multiple package ecosystems.
-
-| Ecosystem       | Support |
-| --------------- | :-----: |
-| npm             |   Yes   |
-| PyPI            |   Yes   |
-| Maven           |   Yes   |
-| Go              |   Yes   |
-| More ecosystems | Planned |
-
----
-
-# Architecture
-
-```text
-                    ┌──────────────┐
-                    │    Project   │
-                    └──────┬───────┘
-                           │
-                           ▼
-                    ┌──────────────┐
-                    │    Parser    │
-                    └──────┬───────┘
-                           │
-                           ▼
-                 ┌────────────────────┐
-                 │ Dependency Resolver│
-                 └──────────┬─────────┘
-                            │
-                            ▼
-                 ┌────────────────────┐
-                 │  Dependency Graph  │
-                 └──────────┬─────────┘
-                            │
-             ┌──────────────┼──────────────┐
-             │              │              │
-             ▼              ▼              ▼
-       ┌──────────┐   ┌──────────┐   ┌──────────┐
-       │   OSV    │   │   NVD    │   │   GHSA   │
-       └────┬─────┘   └────┬─────┘   └────┬─────┘
-            │              │              │
-            └──────────────┼──────────────┘
-                           ▼
-                 ┌────────────────────┐
-                 │ Threat Intelligence│
-                 └──────────┬─────────┘
-                            │
-                ┌───────────┼───────────┐
-                ▼           ▼           ▼
-           True Risk    Taint       Remediation
-             Score      Analysis      Engine
-                │           │           │
-                └───────────┼───────────┘
-                            ▼
-                     Security Report
-```
-
----
-
-# DomiNode vs Traditional Scanners
-
-| Capability                | Traditional Scanner | DomiNode |
-| ------------------------- | :-----------------: | :------: |
-| Vulnerability Detection   |         Yes         |    Yes   |
-| Dependency Analysis       |         Yes         |    Yes   |
-| Transitive Dependencies   |       Limited       |    Yes   |
-| Dependency Graph          |       Limited       |    Yes   |
-| Blast Radius              |          No         |    Yes   |
-| Contextual Risk           |       Limited       |    Yes   |
-| Propagation Analysis      |          No         |    Yes   |
-| Taint Analysis            |          No         |    Yes   |
-| Multi-Source Intelligence |         Some        |    Yes   |
-| Dependency Trace          |       Limited       |    Yes   |
-| AI Remediation            |       Limited       |  Planned |
-| Security Reports          |         Yes         |    Yes   |
-
----
-
-# Getting Started
-
-> Setup commands depend on the current implementation of the repository.
-
-Clone the repository:
-
-```bash
-git clone <repository-url>
-cd dominode
-```
-
-Install the project dependencies:
-
-```bash
-<install-command>
-```
-
-Configure the required environment variables:
-
-```bash
-<environment-configuration>
-```
-
-Start DomiNode:
-
-```bash
-<start-command>
-```
-
----
-
-# Roadmap
-
-## Security Analysis
-
-* [x] Dependency graph generation
-* [x] Direct dependency analysis
-* [x] Transitive dependency analysis
-* [x] Multi-source vulnerability intelligence
-* [x] True Risk Score
-* [x] Propagation analysis
-* [x] Taint analysis
-* [x] Vulnerability severity distribution
-* [x] Dependency trace paths
-* [x] Security reports
-
-## DomiNode Pro
-
-* [ ] AI-powered remediation
-* [ ] Automated pull requests
-* [ ] CI/CD security gates
-* [ ] Compliance exports
-* [ ] Security certification
-* [ ] Enterprise security workflows
-
----
-
-# Research
-
-DomiNode's approach is informed by academic research into software supply-chain security.
-
-The project documentation references three major research papers that contributed to the design of its security analysis approach.
-
-Research references will be added here as the project documentation is finalized.
-
----
-
+## 🔌 VS Code Extension Guide
+
+WebNode Sentinel brings supply chain security directly to where you write code.
+
+### How to Run Locally:
+1. Open the `webnode-sentinel` folder in a new VS Code window.
+2. Open the terminal and run `npm install`.
+3. Press **F5** (or `Run` > `Start Debugging`). 
+4. A new "Extension Development Host" window will open with the extension installed.
+
+### How to Use:
+1. Open any project with a `package.json` in the Extension Host window.
+2. The extension automatically monitors your manifest files.
+3. Open the Command Palette (`Ctrl + Shift + P`) and type **WebNode** to see available commands (e.g., *Scan Dependencies Now*).
+4. Click the **WebNode** icon in the bottom status bar to instantly launch the Threat Intelligence Dashboard inside your editor!

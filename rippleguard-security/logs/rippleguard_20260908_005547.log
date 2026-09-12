@@ -1,8 +1,0 @@
-[2026-09-08 00:55:47] INFO    RippleGuard scan started.
-[2026-09-08 00:55:47] INFO    Dependency analysis started.
-[2026-09-08 00:55:47] INFO    Dependency graph created.
-[2026-09-08 00:55:47] WARNING SQL Injection detected in test_project/app.py
-[2026-09-08 00:55:47] INFO    Taint analysis completed.
-[2026-09-08 00:55:47] WARNING ZAP detected Cross Site Scripting (Reflected)
-[2026-09-08 00:55:47] INFO    Risk calculation completed.
-[2026-09-08 00:55:47] INFO    RippleGuard scan completed.

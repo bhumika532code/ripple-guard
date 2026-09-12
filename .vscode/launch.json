@@ -2,11 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run RippleGuard Sentinel",
+      "name": "Run WebNode Sentinel",
       "type": "extensionHost",
       "request": "launch",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/rippleguard-sentinel"
+        "--extensionDevelopmentPath=${workspaceFolder}/webnode-sentinel"
       ]
     }
   ]

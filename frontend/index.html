@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DomiNode — Dependency Risk Analysis</title>
+  <title>WebNode — Dependency Risk Analysis</title>
   <meta name="description"
     content="Analyze how dependency vulnerabilities propagate through your software stack. Map dependencies, identify high-risk packages, and visualize compromise cascades." />
   <link rel="stylesheet" href="css/style.css" />
@@ -16,51 +16,47 @@
        0. CINEMATIC SPLASH SCREEN (WATER DROPLET IMPACT & EXPANDING RIPPLES)
        ======================================================================= -->
   <!-- =======================================================================
-       0. CINEMATIC SPLASH SCREEN (TOP VIEW: WATER BALL DROP & TRANSPARENT RIPPLES)
+       0. CINEMATIC SPLASH SCREEN (SPIDER WEB THEME)
        ======================================================================= -->
   <div id="splash" role="banner" aria-label="Loading animation">
-    <div class="topview-water-stage">
+    <div class="spider-web-stage">
+      <!-- Web Background Shimmer -->
+      <div class="web-ambient"></div>
 
-      <!-- Still water surface ambient shimmer -->
-      <div class="topview-still-surface"></div>
-
-      <!-- Water Ball Droplet (Falling straight down in top view) -->
-      <div class="topview-drop-assembly">
-        <div class="topview-water-shadow"></div>
-        <div class="topview-water-ball">
-          <span class="water-ball-glint"></span>
-          <span class="water-ball-refract"></span>
-        </div>
+      <!-- Core Web Structure -->
+      <div class="spider-web-core">
+        <div class="web-thread web-rad-1"></div>
+        <div class="web-thread web-rad-2"></div>
+        <div class="web-thread web-rad-3"></div>
+        <div class="web-thread web-rad-4"></div>
+        <div class="web-thread web-rad-5"></div>
+        <div class="web-thread web-rad-6"></div>
+        
+        <div class="web-ring web-ring-1"></div>
+        <div class="web-ring web-ring-2"></div>
+        <div class="web-ring web-ring-3"></div>
+        <div class="web-ring web-ring-4"></div>
       </div>
 
-      <!-- Impact Flash & Fluid Dispersal -->
-      <div class="topview-impact-core"></div>
-
-      <!-- Transparent Concentric Ripples (Top View) -->
-      <div class="topview-ripples-group">
-        <div class="transparent-ripple tr-1"></div>
-        <div class="transparent-ripple tr-2"></div>
-        <div class="transparent-ripple tr-3"></div>
-        <div class="transparent-ripple tr-4"></div>
-        <div class="transparent-ripple tr-5"></div>
+      <!-- The Spider / Central Node -->
+      <div class="spider-node">
+        <span class="spider-eye"></span>
+        <span class="spider-pulse"></span>
       </div>
 
-      <!-- Center micro-droplets radiating outward on impact -->
-      <div class="topview-droplet-burst">
-        <span class="topview-droplet-particle tp-1"></span>
-        <span class="topview-droplet-particle tp-2"></span>
-        <span class="topview-droplet-particle tp-3"></span>
-        <span class="topview-droplet-particle tp-4"></span>
-        <span class="topview-droplet-particle tp-5"></span>
-        <span class="topview-droplet-particle tp-6"></span>
-        <span class="topview-droplet-particle tp-7"></span>
-        <span class="topview-droplet-particle tp-8"></span>
+      <!-- Glowing Dew Drops / Vulnerability Nodes on the Web -->
+      <div class="web-dew-drops">
+        <span class="dew-drop dew-1"></span>
+        <span class="dew-drop dew-2"></span>
+        <span class="dew-drop dew-3"></span>
+        <span class="dew-drop dew-4"></span>
+        <span class="dew-drop dew-5"></span>
+        <span class="dew-drop dew-6"></span>
       </div>
-
     </div>
 
     <div class="splash-caption">
-      <span class="splash-title">DomiNode</span>
+      <span class="splash-title">WebNode</span>
       <span class="splash-sub">Dependency Risk Analysis</span>
       <span class="splash-skip-hint">Click anywhere to skip intro</span>
     </div>
@@ -77,30 +73,26 @@
       <a href="#site" class="nav-brand" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 0;">
         <svg viewBox="0 0 200 40" height="32" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">
           <defs>
-            <linearGradient id="text-white" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#ffffff"/>
-              <stop offset="100%" stop-color="#cbd5e1"/>
+            <linearGradient id="text-dark" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0f172a"/>
+              <stop offset="100%" stop-color="#334155"/>
             </linearGradient>
-            <linearGradient id="text-cyan" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#38bdf8"/>
-              <stop offset="100%" stop-color="#0284c7"/>
-            </linearGradient>
-            <linearGradient id="dom-fill" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#1e293b"/>
-              <stop offset="100%" stop-color="#020617"/>
+            <linearGradient id="text-blue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2563eb"/>
+              <stop offset="100%" stop-color="#1d4ed8"/>
             </linearGradient>
           </defs>
-          <g transform="translate(8, 6) rotate(60)">
-            <rect x="-3" y="-10" width="6" height="20" rx="1" fill="url(#dom-fill)" stroke="#38bdf8" stroke-width="0.8"/>
+          <g transform="translate(10, 20) scale(0.6)">
+            <!-- Simple spider web icon -->
+            <circle cx="0" cy="0" r="16" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="2 3"/>
+            <circle cx="0" cy="0" r="10" fill="none" stroke="#3b82f6" stroke-width="1"/>
+            <circle cx="0" cy="0" r="4" fill="none" stroke="#60a5fa" stroke-width="1"/>
+            <path d="M-16,0 L16,0 M0,-16 L0,16 M-11.3,-11.3 L11.3,11.3 M-11.3,11.3 L11.3,-11.3" stroke="#2563eb" stroke-width="1.5"/>
+            <!-- Center spider dot -->
+            <circle cx="0" cy="0" r="1.5" fill="#1e3a8a"/>
           </g>
-          <g transform="translate(18, 9) rotate(45)">
-            <rect x="-3" y="-12" width="6" height="24" rx="1" fill="url(#dom-fill)" stroke="#38bdf8" stroke-width="0.8"/>
-          </g>
-          <g transform="translate(28, 14) rotate(25)">
-            <rect x="-3" y="-14" width="6" height="28" rx="1" fill="url(#dom-fill)" stroke="#38bdf8" stroke-width="0.8"/>
-          </g>
-          <text x="25" y="32" font-family="'Inter', -apple-system, sans-serif" font-weight="800" font-size="24" letter-spacing="-0.5">
-            <tspan fill="url(#text-white)">D</tspan><tspan fill="url(#text-white)">omi</tspan><tspan fill="url(#text-cyan)">Node</tspan>
+          <text x="32" y="28" font-family="'Outfit', sans-serif" font-weight="800" font-size="22" letter-spacing="-0.5">
+            <tspan fill="url(#text-dark)">Web</tspan><tspan fill="url(#text-blue)">Node</tspan>
           </text>
         </svg>
         <span class="brand-subtitle" style="padding-left: 26px; margin-top: -2px;">Dependency Risk Analysis</span>
@@ -133,7 +125,7 @@
         </div>
 
         <h1 class="hero-title">
-          <span class="title-water-accent">DomiNode</span>
+          <span class="title-web-accent">WebNode</span>
         </h1>
 
         <h2 class="hero-subtitle">Dependency Risk Analysis</h2>
@@ -236,7 +228,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                 </svg>
-                <span>Trigger Laser Pulse</span>
+                <span>Trigger Venom Pulse</span>
               </button>
               <button id="btn-reset-sim" class="btn-reset-sim">Reset Simulator</button>
             </div>
@@ -249,7 +241,7 @@
 
             <aside id="graph-info-panel" class="details-side-card">
               <h3>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--water-cyan)" stroke-width="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--web-cyan)" stroke-width="2">
                   <circle cx="12" cy="12" r="10"></circle>
                   <line x1="12" y1="16" x2="12" y2="12"></line>
                   <line x1="12" y1="8" x2="12.01" y2="8"></line>
@@ -280,7 +272,7 @@
 
           <div class="glass-panel">
             <div class="scoreboard-scroll-wrapper">
-              <table class="water-table">
+              <table class="web-table">
                 <thead>
                   <tr>
                     <th>Status</th>
@@ -342,7 +334,7 @@
                   </div>
                 </div>
 
-                <button id="btn-download-sbom" class="btn-pro-action" style="background: rgba(56,189,248,0.15); border-color: rgba(56,189,248,0.4); color: #38bdf8; margin-top: 10px;" onclick="generateAndDownloadSBOM()">
+                <button id="btn-download-sbom" class="btn-pro-action" style="background: rgba(59, 130, 246,0.15); border-color: rgba(59, 130, 246,0.4); color: #38bdf8; margin-top: 10px;" onclick="generateAndDownloadSBOM()">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
@@ -375,7 +367,7 @@
                   </div>
                   <div style="display: flex; justify-content: space-between;">
                     <span style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Patched Hash</span>
-                    <span id="hash-patched" style="font-family: monospace; font-size: 12px; color: #34d399;">---</span>
+                    <span id="hash-patched" style="font-family: monospace; font-size: 12px; color: #60a5fa;">---</span>
                   </div>
                 </div>
 
@@ -410,7 +402,7 @@
             <!-- Card 1: Severity Distribution -->
             <div class="glass-panel intel-card">
               <div class="intel-card-header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--water-cyan)" stroke-width="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--web-cyan)" stroke-width="2">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
                 </svg>
                 <span>Severity Distribution</span>
@@ -423,7 +415,7 @@
             <!-- Card 2: Direct vs Transitive -->
             <div class="glass-panel intel-card">
               <div class="intel-card-header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--water-cyan)" stroke-width="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--web-cyan)" stroke-width="2">
                   <circle cx="12" cy="12" r="10"></circle>
                   <line x1="12" y1="8" x2="12" y2="16"></line>
                   <line x1="8" y1="12" x2="16" y2="12"></line>
@@ -438,7 +430,7 @@
             <!-- Card 3: Vulnerability Trace Paths -->
             <div class="glass-panel intel-card intel-card-wide">
               <div class="intel-card-header">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--water-cyan)" stroke-width="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--web-cyan)" stroke-width="2">
                   <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                 </svg>
                 <span>Vulnerability Trace Paths</span>
@@ -524,7 +516,7 @@
                 </div>
                 
                 <div id="instant-fix-container" style="display: block; margin-bottom: 16px;">
-                  <button id="btn-instant-download" class="btn-primary" style="width: 100%; padding: 12px; font-weight: bold; font-size: 14px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                  <button id="btn-instant-download" class="btn-primary" style="width: 100%; padding: 12px; font-weight: bold; font-size: 14px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); display: flex; align-items: center; justify-content: center; gap: 8px;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                       <polyline points="7 10 12 15 17 10"></polyline>
@@ -535,6 +527,16 @@
                   <div style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 8px; line-height: 1.4; padding: 8px; background: rgba(0, 0, 0, 0.2); border-radius: 4px; border: 1px dashed rgba(255,255,255,0.1);">
                     <strong style="color: #f59e0b;">Disclaimer:</strong> This reduces risk by patching all fixable vulnerabilities. Dependencies without an official OSV fix remain unpatched and require manual intervention (e.g. sandboxing or swapping). We are an intelligent assistant, not a blind fixer.
                   </div>
+                  <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 12px; margin-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <span style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Post-Patch Risk Score</span>
+                      <span id="post-patch-score" style="font-family: 'Outfit', sans-serif; font-size: 13px; color: #10b981; font-weight: 700;">---</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                      <span style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Risk Reduction</span>
+                      <span id="post-patch-reduction" style="font-family: 'Outfit', sans-serif; font-size: 13px; color: #38bdf8; font-weight: 700;">---</span>
+                    </div>
+                  </div>
                 </div>
                 
                 <div id="ai-logic-results" class="ai-results-container" style="flex: 1; min-height: 300px; max-height: 500px;">
@@ -544,10 +546,10 @@
             </div>
             
             <!-- PANEL 3: Complete Analysis PDF -->
-            <div class="pro-panel glass-panel" style="border-top-color: #10b981;">
+            <div class="pro-panel glass-panel" style="border-top-color: #3b82f6;">
               <div class="pro-panel-header">
                 <div class="pro-panel-title">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
                     <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -561,7 +563,7 @@
                 <p class="pro-desc">Export enterprise-grade security audit documentation covering full dependency trees, vulnerability telemetry, and prioritized remediation actions.</p>
                 
                 <div style="display: flex; gap: 12px; width: 100%; max-width: 480px;">
-                  <button id="btn-generate-pdf" class="btn-pro-action" style="flex: 1; background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.5); color: #34d399;">
+                  <button id="btn-generate-pdf" class="btn-pro-action" style="flex: 1; background: rgba(59, 130, 246,0.2); border-color: rgba(59, 130, 246,0.5); color: #60a5fa;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                       <polyline points="7 10 12 15 17 10"></polyline>
@@ -569,7 +571,7 @@
                     </svg>
                     Technical Audit Report
                   </button>
-                  <button id="btn-generate-pdf-simple" class="btn-pro-action" style="flex: 1; background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5); color: #a78bfa;">
+                  <button id="btn-generate-pdf-simple" class="btn-pro-action" style="flex: 1; background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5); color: #06b6d4;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                       <polyline points="14 2 14 8 20 8"></polyline>
@@ -608,11 +610,11 @@
               <div class="pro-panel-body">
                 <div id="cert-container" class="certificate-wrapper locked">
                   <div class="cert-border-inner"></div>
-                  <div class="cert-watermark">DOMINODE</div>
+                  <div class="cert-watermark">WEBNODE</div>
                   
                   <div class="cert-header-formal">
                     <div class="cert-header-left">
-                      <div class="brand-name" style="font-size: 14px; color: #fff; letter-spacing: 0.2em;">DOMINODE <span style="color: #fbbf24;">SECURITY</span></div>
+                      <div class="brand-name" style="font-size: 14px; color: #fff; letter-spacing: 0.2em;">WEBNODE <span style="color: #fbbf24;">SECURITY</span></div>
                       <div class="cert-id">CERT ID: <span id="cert-id-val">DN-XXXXXXXX</span></div>
                     </div>
                     <div class="cert-header-right">
@@ -627,7 +629,7 @@
                   
                   <div class="cert-body-formal">
                     <p class="cert-declaration">
-                      This document formally certifies that the software manifest designated as <strong id="cert-file-name-formal" class="cert-highlight">---</strong> has undergone comprehensive automated vulnerability analysis using the DomiNode Threat Intelligence Engine. The analysis evaluated the full dependency graph for known Common Vulnerabilities and Exposures (CVEs) and calculated the true cascading blast radius of all components.<br><br>
+                      This document formally certifies that the software manifest designated as <strong id="cert-file-name-formal" class="cert-highlight">---</strong> has undergone comprehensive automated vulnerability analysis using the WebNode Threat Intelligence Engine. The analysis evaluated the full dependency graph for known Common Vulnerabilities and Exposures (CVEs) and calculated the true cascading blast radius of all components.<br><br>
                       <span style="color: #fbbf24; font-weight: 500;">Blockchain Attestation:</span> You should trust our scores because we have blockchain to keep our records safe. The original and remediated dependency state hashes have been sealed for integrity verification.
                     </p>
                     
@@ -693,10 +695,9 @@
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="app-footer">
       <div class="footer-tagline">
-        DomiNode — A vulnerability enters like a drop in still water, and ripples through the entire ecosystem.
+        WebNode — A vulnerability enters like a drop of venom on a spider web, and reverberates through the entire ecosystem.
       </div>
       <div>Designed for Dependency Risk Analysis & Cascading Vulnerability Prevention</div>
     </footer>
@@ -738,6 +739,7 @@
   <script src="js/shared.js"></script>
   <script src="js/app.js"></script>
   <script src="js/pro.js"></script>
+  <script src="js/water.js"></script>
   <script src="js/splash.js"></script>
 
 </body>

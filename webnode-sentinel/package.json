@@ -1,0 +1,70 @@
+{
+  "name": "webnode-sentinel",
+  "displayName": "WebNode Sentinel",
+  "description": "Real-time supply-chain security guardian. Detects vulnerable packages as you install them and suggests safe alternatives.",
+  "version": "1.0.0",
+  "publisher": "webnode",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Other", "Linters"],
+  "icon": "resources/icon.png",
+  "activationEvents": [
+    "onLanguage:json",
+    "onLanguage:plaintext",
+    "onLanguage:xml",
+    "onLanguage:yaml",
+    "onLanguage:toml",
+    "workspaceContains:**/package.json",
+    "workspaceContains:**/requirements.txt",
+    "workspaceContains:**/pom.xml",
+    "workspaceContains:**/go.mod",
+    "workspaceContains:**/Cargo.toml",
+    "workspaceContains:**/Gemfile",
+    "workspaceContains:**/composer.json",
+    "workspaceContains:**/pubspec.yaml",
+    "workspaceContains:**/pyproject.toml",
+    "workspaceContains:**/*.csproj"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "webnode-sentinel",
+          "title": "WebNode Sentinel",
+          "icon": "resources/shield.svg"
+        }
+      ]
+    },
+    "views": {
+      "webnode-sentinel": [
+        {
+          "id": "webnodeDependencies",
+          "name": "Dependencies",
+          "icon": "resources/shield.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "webnode.scanNow",
+        "title": "WebNode: Scan Dependencies Now"
+      },
+      {
+        "command": "webnode.fixPackage",
+        "title": "WebNode: Fix Vulnerable Package"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.1.0"
+  }
+}

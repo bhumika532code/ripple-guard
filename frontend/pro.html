@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DomiNode Security — Premium Analysis</title>
+  <title>WebNode Security — Premium Analysis</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -129,6 +129,22 @@
                 </button>
               </div>
               
+              <div id="instant-fix-container" style="display: block; margin-bottom: 16px;">
+                <div style="font-size: 11px; color: #94a3b8; text-align: center; margin-bottom: 8px; line-height: 1.4; padding: 8px; background: rgba(0, 0, 0, 0.2); border-radius: 4px; border: 1px dashed rgba(255,255,255,0.1);">
+                  <strong style="color: #f59e0b;">Disclaimer:</strong> This reduces risk by patching all fixable vulnerabilities. Dependencies without an official OSV fix remain unpatched and require manual intervention.
+                </div>
+                <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 12px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Post-Patch Risk Score</span>
+                    <span id="post-patch-score" style="font-family: 'Outfit', sans-serif; font-size: 13px; color: #10b981; font-weight: 700;">---</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Risk Reduction</span>
+                    <span id="post-patch-reduction" style="font-family: 'Outfit', sans-serif; font-size: 13px; color: #38bdf8; font-weight: 700;">---</span>
+                  </div>
+                </div>
+              </div>
+
               <div id="ai-logic-results" class="ai-results-container" style="height: 200px;">
                 <div class="intel-placeholder">Awaiting command to generate logical fix strategy.</div>
               </div>
@@ -139,7 +155,7 @@
           <div class="pro-panel glass-panel">
             <div class="pro-panel-header">
               <div class="pro-panel-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                   <polyline points="14 2 14 8 20 8"></polyline>
                   <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -152,7 +168,7 @@
             <div class="pro-panel-body" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 16px;">
               <p class="pro-desc">Download an exhaustive multi-page report detailing every dependency's taint analysis, blast radius, OSV vulnerability data, and AI-suggested resolutions.</p>
               
-              <button id="btn-generate-pdf" class="btn-pro-action" style="max-width: 250px; background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.5); color: #34d399;">
+              <button id="btn-generate-pdf" class="btn-pro-action" style="max-width: 250px; background: rgba(59, 130, 246,0.2); border-color: rgba(59, 130, 246,0.5); color: #60a5fa;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="7 10 12 15 17 10"></polyline>
@@ -186,7 +202,7 @@
                 </div>
                 <div style="display: flex; justify-content: space-between;">
                   <span style="font-size: 11px; color: #94a3b8; text-transform: uppercase;">Patched Hash</span>
-                  <span id="hash-patched" style="font-family: monospace; font-size: 12px; color: #34d399;">---</span>
+                  <span id="hash-patched" style="font-family: monospace; font-size: 12px; color: #60a5fa;">---</span>
                 </div>
               </div>
 
@@ -223,11 +239,11 @@
             <div class="pro-panel-body">
               <div id="cert-container" class="certificate-wrapper locked">
                 <div class="cert-border-inner"></div>
-                <div class="cert-watermark">DOMINODE</div>
+                <div class="cert-watermark">WEBNODE</div>
                 
                 <div class="cert-header-formal">
                   <div class="cert-header-left">
-                    <div class="brand-name" style="font-size: 14px; color: #fff; letter-spacing: 0.2em;">DOMINODE <span style="color: #fbbf24;">SECURITY</span></div>
+                    <div class="brand-name" style="font-size: 14px; color: #fff; letter-spacing: 0.2em;">WEBNODE <span style="color: #fbbf24;">SECURITY</span></div>
                     <div class="cert-id">CERT ID: <span id="cert-id-val">DN-XXXXXXXX</span></div>
                   </div>
                   <div class="cert-header-right">
@@ -242,7 +258,7 @@
                 
                 <div class="cert-body-formal">
                   <p class="cert-declaration">
-                    This document formally certifies that the software manifest designated as <strong id="cert-file-name-formal" class="cert-highlight">---</strong> has undergone comprehensive automated vulnerability analysis using the DomiNode Threat Intelligence Engine. The analysis evaluated the full dependency graph for known Common Vulnerabilities and Exposures (CVEs) and calculated the true cascading blast radius of all components.<br><br>
+                    This document formally certifies that the software manifest designated as <strong id="cert-file-name-formal" class="cert-highlight">---</strong> has undergone comprehensive automated vulnerability analysis using the WebNode Threat Intelligence Engine. The analysis evaluated the full dependency graph for known Common Vulnerabilities and Exposures (CVEs) and calculated the true cascading blast radius of all components.<br><br>
                     <span style="color: #fbbf24; font-weight: 500;">Blockchain Attestation:</span> You should trust our scores because we have blockchain to keep our records safe. The original and remediated dependency state hashes have been sealed for integrity verification.
                   </p>
                   

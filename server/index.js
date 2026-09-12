@@ -428,7 +428,7 @@ async function fetchNVD(packageName) {
     const resp = await axios.get('https://services.nvd.nist.gov/rest/json/cves/2.0', {
       params: { keywordSearch: packageName, resultsPerPage: 10 },
       timeout: 10000,
-      headers: { 'User-Agent': 'RippleGuard/1.0' }
+      headers: { 'User-Agent': 'WebNode/1.0' }
     });
     const vulns = (resp.data.vulnerabilities || []).map(v => {
       const cve = v.cve || {};
@@ -511,7 +511,7 @@ async function fetchOSSIndex(depNames, ecosystem) {
         timeout: 15000,
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'RippleGuard/1.0'
+          'User-Agent': 'WebNode/1.0'
         }
       });
 
@@ -766,21 +766,19 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
           v.modified = full.modified || null;
 
           // Add fix version info
-          if (full.affected && full.affected.length > 0) {
-            const aff = full.affected.find(a => a.package && a.package.name === nodeId) || full.affected[0];
-            if (aff) {
-              v.affectedPackage = aff.package?.name || nodeId;
-              v.affectedVersions = aff.versions || [];
+          const aff = (full.affected && full.affected.length > 0) ? (full.affected.find(a => a.package && a.package.name === nodeId) || full.affected[0]) : null;
+          if (aff) {
+            v.affectedPackage = aff.package?.name || nodeId;
+            v.affectedVersions = aff.versions || [];
 
-              // Extract fix events from ranges
-              if (aff.ranges) {
-                for (const range of aff.ranges) {
-                  if (range.events) {
-                    const fixEvent = range.events.find(e => e.fixed);
-                    const introEvent = range.events.find(e => e.introduced);
-                    if (fixEvent && !v.fixVersion) v.fixVersion = fixEvent.fixed;
-                    if (introEvent && !v.introducedVersion) v.introducedVersion = introEvent.introduced;
-                  }
+            // Extract fix events from ranges
+            if (aff.ranges) {
+              for (const range of aff.ranges) {
+                if (range.events) {
+                  const fixEvent = range.events.find(e => e.fixed);
+                  const introEvent = range.events.find(e => e.introduced);
+                  if (fixEvent && !v.fixVersion) v.fixVersion = fixEvent.fixed;
+                  if (introEvent && !v.introducedVersion) v.introducedVersion = introEvent.introduced;
                 }
               }
             }
@@ -1042,14 +1040,14 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
             let found = false;
             for (let i = 0; i < lines.length; i++) {
               if (regex.test(lines[i].trim())) {
-                lines[i] = `${pkg}>=${fixVer} # RippleGuard Auto-Fix`;
+                lines[i] = `${pkg}>=${fixVer} # WebNode Auto-Fix`;
                 found = true;
                 changed = true;
               }
             }
             if (!found) {
               if (!addedTransitiveHeader) {
-                lines.push('\n# RIPPLEGUARD AUTO-FIX: Transitive Dependency Overrides');
+                lines.push('\n# WEBNODE AUTO-FIX: Transitive Dependency Overrides');
                 addedTransitiveHeader = true;
               }
               lines.push(`${pkg}>=${fixVer}`);
@@ -1079,7 +1077,7 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
           }
           
           if (mgmtDeps && patchedXml.includes('</project>')) {
-            const mgmtBlock = `\n  <!-- RIPPLEGUARD AUTO-FIX: Enforcing safe versions for transitive vulnerabilities -->\n  <dependencyManagement>\n    <dependencies>${mgmtDeps}\n    </dependencies>\n  </dependencyManagement>\n`;
+            const mgmtBlock = `\n  <!-- WEBNODE AUTO-FIX: Enforcing safe versions for transitive vulnerabilities -->\n  <dependencyManagement>\n    <dependencies>${mgmtDeps}\n    </dependencies>\n  </dependencyManagement>\n`;
             patchedXml = patchedXml.replace('</project>', mgmtBlock + '</project>');
           }
           
@@ -1119,6 +1117,6 @@ app.post('/api/analyze', upload.single('manifestFile'), async (req, res) => {
 });
 
 const PORT = 3000;
-app.listen(PORT, () => console.log(`DomiNode OSV Backend running on port ${PORT}`));
+app.listen(PORT, () => console.log(`WebNode OSV Backend running on port ${PORT}`));
 
 

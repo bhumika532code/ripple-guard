@@ -1,7 +1,7 @@
 {
   "name": "vulnerable-demo-app",
   "version": "1.0.0",
-  "description": "A demo project with intentionally vulnerable dependencies for testing RippleGuard Sentinel",
+  "description": "A demo project with intentionally vulnerable dependencies for testing WebNode Sentinel",
   "main": "index.js",
   "dependencies": {
     "lodash": "4.17.15",

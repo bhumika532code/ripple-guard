@@ -91,7 +91,8 @@ async function handleUploadedFile(file) {
   formData.append('originalName', file.name);
 
   try {
-    const response = await fetch('http://localhost:3000/api/analyze', {
+    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : '';
+    const response = await fetch(`${API_BASE}/api/analyze`, {
       method: 'POST',
       body: formData
     });
@@ -133,10 +134,10 @@ async function handleUploadedFile(file) {
     resetPropagation();
     
     // Save state to sessionStorage for PRO tab
-    sessionStorage.setItem('dominode_nodes', JSON.stringify(NODES));
-    sessionStorage.setItem('dominode_edges', JSON.stringify(EDGES));
-    sessionStorage.setItem('dominode_osv', JSON.stringify(window.OSV_DETAILS));
-    sessionStorage.setItem('dominode_filename', file.name);
+    sessionStorage.setItem('webnode_nodes', JSON.stringify(NODES));
+    sessionStorage.setItem('webnode_edges', JSON.stringify(EDGES));
+    sessionStorage.setItem('webnode_osv', JSON.stringify(window.OSV_DETAILS));
+    sessionStorage.setItem('webnode_filename', file.name);
 
   } catch (err) {
     console.error(err);
@@ -173,7 +174,7 @@ function drawDependencyGraph() {
     const path = createSvgElement("path", {
       d: d,
       fill: "none",
-      stroke: "rgba(56, 189, 248, 0.25)",
+      stroke: "rgba(59, 130, 246, 0.25)",
       "stroke-width": 1.2,
       class: "graph-edge",
       "data-from": fromId,
@@ -334,7 +335,7 @@ function showNodeDetails(nodeId) {
           </div>
           <div class="stat-box">
             <span class="stat-box-label">Risk Profile</span>
-            <span class="stat-box-val" style="color:var(--water-cyan);">Consumer</span>
+            <span class="stat-box-val" style="color:var(--web-cyan);">Consumer</span>
           </div>
         </div>
       </div>
@@ -419,6 +420,22 @@ function buildScoreboard() {
     .filter(n => n.type === "package")
     .map(n => ({ node: n, m: METRICS[n.id] }))
     .sort((a, b) => b.m.trueRisk - a.m.trueRisk);
+
+  if (ranked.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td colspan="5" style="text-align: center; padding: 30px; color: #22c55e;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 10px; display: block;">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <path d="M9 12l2 2 4-4"></path>
+        </svg>
+        <div style="font-size: 1.2rem; font-weight: 600;">Zero Vulnerabilities Found!</div>
+        <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;">Your dependency tree is fully secure.</div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+    return;
+  }
 
   ranked.forEach(({ node, m }) => {
     let scoreClass = "low";
@@ -536,7 +553,7 @@ function dimGraphForSimulation(compromisedId, affectedDistances) {
 
     if (isCompromisedOrigin) {
       fill = "#ffffff";
-      stroke = "var(--water-cyan-bright)";
+      stroke = "var(--web-cyan-bright)";
       circle.setAttribute("stroke-width", "3");
 
       // Add aura if not exists
@@ -617,10 +634,10 @@ function simulateLaserPropagation(startId) {
       </svg>
       Live Event Logs
     </div>
-    <div class="node-detail-content" style="background:#050505; border-radius:8px; border:1px solid rgba(56,189,248,0.3); padding:15px; font-family:'JetBrains Mono', monospace; font-size:11px; height:340px; display:flex; flex-direction:column; position:relative; overflow:hidden;">
+    <div class="node-detail-content" style="background:#050505; border-radius:8px; border:1px solid rgba(59, 130, 246,0.3); padding:15px; font-family:'JetBrains Mono', monospace; font-size:11px; height:340px; display:flex; flex-direction:column; position:relative; overflow:hidden;">
       <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, transparent, #38bdf8, transparent); animation: scanline 2s linear infinite;"></div>
-      <div style="color:var(--water-cyan); margin-bottom:12px; font-weight:bold; font-size:12px; border-bottom:1px solid rgba(56,189,248,0.2); padding-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-        <span>> EXEC RippleGuard.SecurityEngine</span>
+      <div style="color:var(--web-cyan); margin-bottom:12px; font-weight:bold; font-size:12px; border-bottom:1px solid rgba(59, 130, 246,0.2); padding-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+        <span>> EXEC WebNode.SecurityEngine</span>
         <span class="blinking-cursor" style="display:inline-block; width:8px; height:12px; background:#38bdf8; animation: blink 1s step-end infinite;"></span>
       </div>
       <div id="live-logs-container" style="overflow-y:hidden; flex-grow:1; display:flex; flex-direction:column; justify-content:flex-start; gap:6px;"></div>
@@ -637,7 +654,7 @@ function simulateLaserPropagation(startId) {
   const m = METRICS[startId];
   
   const logMessages = [
-    `[INFO] RippleGuard scan started. Scan ID: ${scanId}`,
+    `[INFO] WebNode scan started. Scan ID: ${scanId}`,
     `[INFO] Target node isolated: ${node.name}`,
     `[INFO] Initializing Semgrep SAST Engine...`,
     `[INFO] Analyzing source code for injection vectors...`,
@@ -693,9 +710,10 @@ function executeSimulationRender(startId, node, affected, hopGroups, maxHop) {
   updatePropagationPanel(node, affected, hopGroups);
 
   // Trigger water drop canvas wave at center
-  if (typeof window.triggerWaterDrop === "function") {
+  if (typeof window.triggerWebPulse === "function") {
     const startPos = POSITIONS[startId];
-    window.triggerWaterDrop(window.innerWidth * (startPos.x / VIEW_WIDTH), window.innerHeight * 0.7, 0.7);
+    // Fire a venom pulse near the bottom
+    window.triggerWebPulse(window.innerWidth * (startPos.x / VIEW_WIDTH), window.innerHeight * 0.7, 0.7);
   }
 
   const svg = document.getElementById("graph");
@@ -836,7 +854,7 @@ function updatePropagationPanel(node, affected, hopGroups) {
     const nodeNames = hopGroups[hop].map(id => {
       const n = NODES.find(item => item.id === id);
       const isApp = n.type === "app";
-      return `<span style="${isApp ? 'color:var(--water-cyan);font-weight:700;' : ''}">${n.name}${isApp ? ' (App)' : ''}</span>`;
+      return `<span style="${isApp ? 'color:var(--web-cyan);font-weight:700;' : ''}">${n.name}${isApp ? ' (App)' : ''}</span>`;
     });
 
     hopHtml += `
@@ -1070,7 +1088,7 @@ function generateAIFix(nodeId, resultsPanel) {
 
   resultsPanel.style.display = "block";
   resultsPanel.innerHTML = `
-    <div style="display:flex; align-items:center; gap:12px; color:var(--water-cyan);">
+    <div style="display:flex; align-items:center; gap:12px; color:var(--web-cyan);">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 2s linear infinite;">
         <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
       </svg>
@@ -1133,7 +1151,7 @@ function generateAIFix(nodeId, resultsPanel) {
           </div>
           <div class="smart-fix-stat">
             <span class="smart-fix-stat-label">Transitive Vulns Fixed</span>
-            <span class="smart-fix-stat-val" style="color: #a78bfa;">${smartFix.transitiveVulnCount}</span>
+            <span class="smart-fix-stat-val" style="color: #06b6d4;">${smartFix.transitiveVulnCount}</span>
           </div>
           <div class="smart-fix-stat">
             <span class="smart-fix-stat-label">Highest Impact</span>
@@ -1206,7 +1224,7 @@ function buildCombinedOverview() {
   });
 
   if (!threatsHtml) {
-    threatsHtml = `<div style="font-size: 11px; color: #34d399;">No active threats found.</div>`;
+    threatsHtml = `<div style="font-size: 11px; color: #60a5fa;">No active threats found.</div>`;
   }
 
   // Get Top Fix Recommendation
@@ -1216,8 +1234,8 @@ function buildCombinedOverview() {
     const node = NODES.find(n => n.id === topFix.dep);
     if (node) {
       topFixHtml = `
-        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 8px; border-radius: 6px; margin-top: 8px;">
-          <div style="font-size: 11px; color: #34d399; margin-bottom: 2px;">Recommended Action</div>
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 8px; border-radius: 6px; margin-top: 8px;">
+          <div style="font-size: 11px; color: #60a5fa; margin-bottom: 2px;">Recommended Action</div>
           <div style="font-size: 12px; color: var(--text-bright);">Upgrade <strong>${node.name}</strong></div>
           <div style="font-size: 10px; color: var(--text-dim); margin-top: 2px;">Fixes ${topFix.totalFixable} vulnerabilities</div>
         </div>
@@ -1272,8 +1290,8 @@ window.generateAndDownloadSBOM = function() {
       timestamp: new Date().toISOString(),
       tools: [
         {
-          vendor: "RippleGuard Security",
-          name: "RippleGuard SBOM Generator",
+          vendor: "WebNode Security",
+          name: "WebNode SBOM Generator",
           version: "2.4.0"
         }
       ],
@@ -1316,7 +1334,7 @@ window.generateAndDownloadSBOM = function() {
             source: { name: "OSV Database" },
             ratings: [
               {
-                source: { name: "RippleGuard True Risk" },
+                source: { name: "WebNode True Risk" },
                 score: METRICS[n.id]?.trueRisk || 0,
                 method: "CVSSv3"
               }

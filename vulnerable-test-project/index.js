@@ -1,4 +1,4 @@
-// Vulnerable Demo App - for testing RippleGuard Sentinel
+// Vulnerable Demo App - for testing WebNode Sentinel
 const express = require('express');
 const lodash = require('lodash');
 const axios = require('axios');

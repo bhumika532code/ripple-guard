@@ -4,7 +4,7 @@ WebNode is a next-generation software supply chain security platform that moves 
 
 ---
 
-## 🚀 Core Features
+##  Core Features
 
 ### 1. Dependency Graph Visualization
 **Description:** A highly interactive, dynamic 3D web mapping your entire software architecture.
@@ -16,7 +16,7 @@ WebNode is a next-generation software supply chain security platform that moves 
 
 ---
 
-## 🌟 Unique Features
+## Unique Features
 
 ### 1. All Databases + Kali Tools + OWASP Integration
 **Description:** We don't just rely on one source. WebNode cross-references vulnerabilities against a massive array of global databases and standard offensive security tooling.
@@ -52,7 +52,7 @@ WebNode is a next-generation software supply chain security platform that moves 
 
 ---
 
-## 💎 Pro Features
+##  Pro Features
 
 * **Comprehensive PDF Audits:** Generate beautiful, technical audit reports for stakeholders and compliance officers.
 * **AI Chat Assistant:** Interactive threat-modeling chatbot capable of explaining complex CVEs.
@@ -62,7 +62,7 @@ WebNode is a next-generation software supply chain security platform that moves 
 
 ---
 
-## 📈 Market Strategy
+## Market Strategy
 
 The DevSecOps market is flooded with legacy scanners (like Snyk, Dependabot, or BlackDuck) that cause immense "alert fatigue" by generating massive, unreadable lists of vulnerabilities. 
 
@@ -83,7 +83,7 @@ India boasts one of the fastest-growing developer and startup ecosystems in the 
 
 ---
 
-## 🔌 VS Code Extension Guide
+##  VS Code Extension Guide
 
 WebNode Sentinel brings supply chain security directly to where you write code.
 
